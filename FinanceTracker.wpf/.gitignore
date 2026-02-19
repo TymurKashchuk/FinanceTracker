@@ -1,0 +1,33 @@
+﻿# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS
+.vs/
+
+# Rider
+.idea/
+
+# Logs
+*.log
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+artifacts/
+
+# Transient
+*.tmp
+*.temp
+
+*.db
+*.db-shm
+*.db-wal

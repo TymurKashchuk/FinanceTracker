@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35806.99 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceTracker.wpf", "FinanceTracker.wpf\FinanceTracker.wpf.csproj", "{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8682AD66-30F2-4D9C-8CE2-99B8B31143AF}
+	EndGlobalSection
+EndGlobal
