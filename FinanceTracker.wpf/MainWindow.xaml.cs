@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,6 +9,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using FinanceTracker.wpf.Models;
+using FinanceTracker.wpf.Services;
 
 namespace FinanceTracker.wpf;
 
@@ -19,5 +22,19 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Loaded += MainWindow_Loaded;
+    }
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e) {
+        var service = new FinanceService();
+        await service.AddTransactionAsync(new Transaction {
+            Amount = 100,
+            Description = "Test income",
+            Date = DateTime.Now,
+            IsIncome = true
+        });
+
+        var list = await service.GetTransactionsAsync();
+        Debug.WriteLine($"Transactions count: {list.Count}");
     }
 }
