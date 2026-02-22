@@ -54,12 +54,17 @@ namespace FinanceTracker.wpf.ViewModels
 
         public async Task AddAsync()
         {
+            if (string.IsNullOrWhiteSpace(Description)) return;
+
+            if (Amount <= 0)
+                return;
+
             var transaction = new Transaction
             {
                 Description = Description,
                 Amount = Amount,
                 Date = DateTime.Now,
-                IsIncome = true
+                IsIncome = isIncome
             };
 
             await _financeService.AddTransactionAsync(transaction);
@@ -72,5 +77,11 @@ namespace FinanceTracker.wpf.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        private bool _isIncome = true;
+        public bool isIncome {
+            get => _isIncome;
+            set { _isIncome = value; OnPropertyChanged(); }
+        }
     }
 }

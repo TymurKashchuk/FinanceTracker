@@ -62,21 +62,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 9,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "RelayCommand.cs",
-              "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
-              "RelativeDocumentMoniker": "FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
-              "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
-              "RelativeToolTip": "FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-22T17:26:36.653Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 1,
@@ -85,7 +72,7 @@
               "RelativeDocumentMoniker": "FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
               "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
               "RelativeToolTip": "FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACMAAAAAAAAAAIA5wEIAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-22T17:23:49.501Z",
               "EditorCaption": ""
@@ -100,8 +87,7 @@
               "RelativeToolTip": "FinanceTracker.wpf\\Services\\FinanceService.cs",
               "ViewState": "AgIAAB4AAAAAAAAAAAAowBsAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-20T21:56:34.926Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-20T21:56:34.926Z"
             },
             {
               "$type": "Document",
@@ -201,6 +187,18 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RelayCommand.cs",
+              "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
+              "RelativeDocumentMoniker": "FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
+              "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
+              "RelativeToolTip": "FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-22T17:26:36.653Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 5,
               "Title": "IFinanceService.cs",
               "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\Services\\IFinanceService.cs",
@@ -221,8 +219,7 @@
               "RelativeToolTip": "FinanceTracker.wpf\\MainWindow.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T19:40:15.762Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-19T19:40:15.762Z"
             }
           ]
         }
