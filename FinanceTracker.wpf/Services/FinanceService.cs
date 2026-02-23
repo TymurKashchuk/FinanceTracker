@@ -56,5 +56,19 @@ namespace FinanceTracker.wpf.Services
                 await db.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Account>> GetAccountsAsync() {
+            using var db = new AppDbContext();
+            return await db.Accounts
+                .OrderBy(a => a.Name)
+                .ToListAsync();
+        }
+
+        public async Task<List<Category>> GetCategoriesAsync() {
+            using var db = new AppDbContext();
+            return await db.Categories
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+        }
     }
 }
