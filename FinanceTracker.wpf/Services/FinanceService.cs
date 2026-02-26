@@ -110,5 +110,35 @@ namespace FinanceTracker.wpf.Services
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
+
+        public class AccountBalanceDto { 
+            public int AccountId { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public decimal Balance { get; set; }
+        }
+
+        public async Task<List<AccountBalanceDto>> GetAccountBalancesAsync()
+        {
+            using var db = new AppDbContext();
+
+            var accounts = await db.Accounts.ToListAsync();
+            var transactions = await db.Transactions.ToListAsync();
+
+            var balances = accounts
+                .Select(a => new AccountBalanceDto
+                {
+                    AccountId = a.Id,
+                    Name = a.Name,
+                    Balance =
+                        a.InitialBalance +
+                        transactions
+                            .Where(t => t.AccountId == a.Id)
+                            .Sum(t => t.IsIncome ? t.Amount : -t.Amount)
+                })
+                .ToList();
+
+            return balances;
+        }
+
     }
 }

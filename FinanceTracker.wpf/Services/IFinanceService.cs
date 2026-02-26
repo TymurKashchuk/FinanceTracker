@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FinanceTracker.wpf.Models;
+using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.Services
 {
@@ -12,5 +13,7 @@ namespace FinanceTracker.wpf.Services
         Task<List<Account>> GetAccountsAsync();
         Task<List<Category>> GetCategoriesAsync();
         Task SeedAsync();
+        Task<List<AccountBalanceDto>> GetAccountBalancesAsync();
+
     }
 }
