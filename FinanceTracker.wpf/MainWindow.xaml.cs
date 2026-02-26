@@ -22,19 +22,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        Loaded += MainWindow_Loaded;
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e) {
-        var service = new FinanceService();
-        await service.AddTransactionAsync(new Transaction {
-            Amount = 100,
-            Description = "Test income",
-            Date = DateTime.Now,
-            IsIncome = true
-        });
-
-        var list = await service.GetTransactionsAsync();
-        Debug.WriteLine($"Transactions count: {list.Count}");
-    }
 }

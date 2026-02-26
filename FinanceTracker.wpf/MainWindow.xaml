@@ -3,33 +3,158 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FinanceTracker.wpf"
         xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Finance Tracker"
+        Height="500"
+        Width="1150"
+        Background="#F5F6FA">
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <DockPanel Margin="10">
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBox Width="200" Margin="0,0,10,0"
-                     Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox Width="100" Margin="0,0,10,0"
-                     Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
-            <CheckBox Content="Income" Margin="0,0,10,0" IsChecked="{Binding IsIncome}"/>
-            <Button Content="Add" Width="80" Command="{Binding AddCommand}"/>
-            <Button Content="Load" Width="80" Margin="10,0,0,0" Command="{Binding LoadCommand}"/>
-        </StackPanel>
+    <Window.Resources>
 
-        <DataGrid ItemsSource="{Binding Transactions}" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
-                <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="100"/>
-                <DataGridCheckBoxColumn Header="Income" Binding="{Binding IsIncome}" Width="80"/>
-                <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="150"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Стиль кнопок -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#4F46E5"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Загальний розмір шрифту -->
+        <Style TargetType="Control">
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+
+        <Style TargetType="DatePicker">
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F3F4F6"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+        </Style>
+
+    </Window.Resources>
+
+    <DockPanel Margin="20">
+
+        <!-- Верхня панель -->
+        <Border Background="White"
+                CornerRadius="8"
+                Padding="15"
+                DockPanel.Dock="Top">
+
+            <StackPanel>
+
+                <!-- Ряд з полями -->
+                <WrapPanel Margin="0,0,0,10">
+
+                    <TextBox Width="200"
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <TextBox Width="100"
+                             Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <ComboBox Width="140"
+                              ItemsSource="{Binding Accounts}"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{Binding SelectedAccount}"/>
+
+                    <ComboBox Width="140"
+                              ItemsSource="{Binding Categories}"
+                              DisplayMemberPath="Name"
+                              SelectedItem="{Binding SelectedCategory}"/>
+
+                    <CheckBox Content="Income"
+                              VerticalAlignment="Center"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding IsIncome}"/>
+
+                    <DatePicker Width="130"
+                                SelectedDate="{Binding FromDate}"/>
+
+                    <DatePicker Width="130"
+                                SelectedDate="{Binding ToDate}"/>
+
+                </WrapPanel>
+
+                <!-- Ряд з кнопками -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+
+                    <Button Content="Add"
+                            Width="100"
+                            Command="{Binding AddCommand}"/>
+
+                    <Button Content="Load"
+                            Width="100"
+                            Background="#10B981"
+                            Command="{Binding LoadCommand}"/>
+
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+
+        <!-- Таблиця -->
+        <Border Background="White"
+                CornerRadius="8"
+                Padding="10"
+                Margin="0,15,0,0">
+
+            <DataGrid ItemsSource="{Binding Transactions}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      IsReadOnly="True">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Description"
+                                        Binding="{Binding Description}"
+                                        Width="*"/>
+
+                    <DataGridTextColumn Header="Amount"
+                                        Binding="{Binding Amount}"
+                                        Width="100"/>
+
+                    <DataGridCheckBoxColumn Header="Income"
+                                            Binding="{Binding IsIncome}"
+                                            Width="80"/>
+
+                    <DataGridTextColumn Header="Account"
+                                        Binding="{Binding Account.Name}"
+                                        Width="120"/>
+
+                    <DataGridTextColumn Header="Category"
+                                        Binding="{Binding Category.Name}"
+                                        Width="120"/>
+
+                    <DataGridTextColumn Header="Date"
+                                        Binding="{Binding Date}"
+                                        Width="150"/>
+                </DataGrid.Columns>
+
+            </DataGrid>
+        </Border>
+
     </DockPanel>
 </Window>

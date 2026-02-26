@@ -9,5 +9,8 @@ namespace FinanceTracker.wpf.Services
         Task<List<Transaction>> GetTransactionsAsync();
         Task AddTransactionAsync(Transaction transaction);
         Task DeleteTransactionAsync(int id);
+        Task<List<Account>> GetAccountsAsync();
+        Task<List<Category>> GetCategoriesAsync();
+        Task SeedAsync();
     }
 }

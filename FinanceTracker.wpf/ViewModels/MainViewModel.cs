@@ -20,6 +20,23 @@ namespace FinanceTracker.wpf.ViewModels
 
         private string _description = string.Empty;
 
+        private bool _isIncome = true;
+        public ObservableCollection<Account> Accounts { get; } = new();
+        public ObservableCollection<Category> Categories { get; } = new();
+
+        private Account? _selectedAccount;
+        public Account? SelectedAccount
+        {
+            get => _selectedAccount;
+            set { _selectedAccount = value; OnPropertyChanged(); }
+        }
+
+        private Category? _selectedCategory;
+        public Category? SelectedCategory
+        {
+            get => _selectedCategory;
+            set { _selectedCategory = value; OnPropertyChanged(); }
+        }
         public string Description
         {
             get => _description;
@@ -42,12 +59,42 @@ namespace FinanceTracker.wpf.ViewModels
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
             AddCommand = new RelayCommand(async _ => await AddAsync());
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await _financeService.SeedAsync();
+            await LoadAsync();
         }
 
         public async Task LoadAsync()
         {
+            Accounts.Clear();
+            var accounts = await _financeService.GetAccountsAsync();
+            foreach (var a in accounts)
+                Accounts.Add(a);
+
+            if (SelectedAccount == null && Accounts.Any())
+                SelectedAccount = Accounts.First();
+
+            Categories.Clear();
+            var categories = await _financeService.GetCategoriesAsync();
+            foreach (var c in categories)
+                Categories.Add(c);
+
+            if (SelectedCategory == null && Categories.Any())
+                SelectedCategory = Categories.First();
+
             Transactions.Clear();
             var items = await _financeService.GetTransactionsAsync();
+
+            if (FromDate.HasValue)
+                items = items.Where(t => t.Date >= FromDate.Value).ToList();
+
+            if (ToDate.HasValue)
+                items = items.Where(t => t.Date <= ToDate.Value).ToList();
+
             foreach (var t in items)
                 Transactions.Add(t);
         }
@@ -59,12 +106,16 @@ namespace FinanceTracker.wpf.ViewModels
             if (Amount <= 0)
                 return;
 
+            if (SelectedAccount == null || SelectedCategory == null) return;
+
             var transaction = new Transaction
             {
                 Description = Description,
                 Amount = Amount,
                 Date = DateTime.Now,
-                IsIncome = isIncome
+                IsIncome = IsIncome,
+                AccountId = SelectedAccount.Id,
+                CategoryId = SelectedCategory.Id
             };
 
             await _financeService.AddTransactionAsync(transaction);
@@ -74,12 +125,25 @@ namespace FinanceTracker.wpf.ViewModels
             Amount = 0;
         }
 
+        private DateTime? _fromDate;
+        private DateTime? _toDate;
+        public DateTime? FromDate
+        {
+            get => _fromDate;
+            set { _fromDate = value; OnPropertyChanged(); }
+        }
+
+        public DateTime? ToDate
+        {
+            get => _toDate;
+            set { _toDate = value; OnPropertyChanged(); }
+        }
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        private bool _isIncome = true;
-        public bool isIncome {
+        public bool IsIncome
+        {
             get => _isIncome;
             set { _isIncome = value; OnPropertyChanged(); }
         }
