@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
+        xmlns:views="clr-namespace:FinanceTracker.wpf.Views"
         mc:Ignorable="d"
         Title="Finance Tracker"
         Height="500"
@@ -117,44 +118,49 @@
         </Border>
 
         <!-- Таблиця -->
-        <Border Background="White"
-                CornerRadius="8"
-                Padding="10"
-                Margin="0,15,0,0">
+        <Grid Margin="0,15,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <DataGrid ItemsSource="{Binding Transactions}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      IsReadOnly="True">
+            <!-- Таблиця транзакцій -->
+            <Border Background="White"
+            CornerRadius="8"
+            Padding="10"
+            Grid.Column="0"
+            Margin="0,0,10,0">
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Description"
-                                        Binding="{Binding Description}"
-                                        Width="*"/>
+                <DataGrid ItemsSource="{Binding Transactions}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Description"
+                                    Binding="{Binding Description}"
+                                    Width="*"/>
+                        <DataGridTextColumn Header="Amount"
+                                    Binding="{Binding Amount}"
+                                    Width="100"/>
+                        <DataGridCheckBoxColumn Header="Income"
+                                        Binding="{Binding IsIncome}"
+                                        Width="80"/>
+                        <DataGridTextColumn Header="Account"
+                                    Binding="{Binding Account.Name}"
+                                    Width="120"/>
+                        <DataGridTextColumn Header="Category"
+                                    Binding="{Binding Category.Name}"
+                                    Width="120"/>
+                        <DataGridTextColumn Header="Date"
+                                    Binding="{Binding Date}"
+                                    Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
 
-                    <DataGridTextColumn Header="Amount"
-                                        Binding="{Binding Amount}"
-                                        Width="100"/>
-
-                    <DataGridCheckBoxColumn Header="Income"
-                                            Binding="{Binding IsIncome}"
-                                            Width="80"/>
-
-                    <DataGridTextColumn Header="Account"
-                                        Binding="{Binding Account.Name}"
-                                        Width="120"/>
-
-                    <DataGridTextColumn Header="Category"
-                                        Binding="{Binding Category.Name}"
-                                        Width="120"/>
-
-                    <DataGridTextColumn Header="Date"
-                                        Binding="{Binding Date}"
-                                        Width="150"/>
-                </DataGrid.Columns>
-
-            </DataGrid>
-        </Border>
-
+            <!-- UserControl з акаунтами -->
+            <views:AccountSummaryView Grid.Column="1"
+                              DataContext="{Binding}"/>
+        </Grid>
     </DockPanel>
 </Window>

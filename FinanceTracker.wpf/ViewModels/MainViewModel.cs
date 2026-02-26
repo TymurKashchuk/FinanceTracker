@@ -10,6 +10,7 @@ using FinanceTracker.wpf.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
 {
@@ -97,6 +98,13 @@ namespace FinanceTracker.wpf.ViewModels
 
             foreach (var t in items)
                 Transactions.Add(t);
+
+            AccountBalances.Clear();
+            var balances = await _financeService.GetAccountBalancesAsync();
+            foreach (var b in balances)
+                AccountBalances.Add(b);
+
+            TotalBalance = AccountBalances.Sum(b => b.Balance);
         }
 
         public async Task AddAsync()
@@ -146,6 +154,14 @@ namespace FinanceTracker.wpf.ViewModels
         {
             get => _isIncome;
             set { _isIncome = value; OnPropertyChanged(); }
+        }
+
+        public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
+
+        private decimal _totalBalance;
+        public decimal TotalBalance {
+            get => _totalBalance;
+            set { _totalBalance = value; OnPropertyChanged(); }
         }
     }
 }
