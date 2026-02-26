@@ -59,6 +59,13 @@ namespace FinanceTracker.wpf.ViewModels
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
             AddCommand = new RelayCommand(async _ => await AddAsync());
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await _financeService.SeedAsync();
+            await LoadAsync();
         }
 
         public async Task LoadAsync()
