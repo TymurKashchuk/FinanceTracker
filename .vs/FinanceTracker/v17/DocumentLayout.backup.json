@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|solutionrelative:financetracker.wpf\\views\\accountsummaryview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|d:\\pet-project\\financetracker\\financetracker.wpf\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|solutionrelative:financetracker.wpf\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|d:\\pet-project\\financetracker\\financetracker.wpf\\converter\\balancetobrushconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|solutionrelative:financetracker.wpf\\converter\\balancetobrushconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -17,10 +21,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|d:\\pet-project\\financetracker\\financetracker.wpf\\services\\financeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|solutionrelative:financetracker.wpf\\services\\financeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|d:\\pet-project\\financetracker\\financetracker.wpf\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|solutionrelative:financetracker.wpf\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{00E8CC39-DBB5-4DFD-A31A-D7A7AD0C9ED7}|FinanceTracker.wpf\\FinanceTracker.wpf.csproj|d:\\pet-project\\financetracker\\financetracker.wpf\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -82,21 +82,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 5,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "FinanceTracker.wpf\\MainWindow.xaml.cs",
-              "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\MainWindow.xaml.cs",
-              "RelativeToolTip": "FinanceTracker.wpf\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-23T19:06:53.155Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 8,
@@ -107,12 +94,11 @@
               "RelativeToolTip": "FinanceTracker.wpf\\ViewModels\\RelayCommand.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-22T17:26:36.653Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-22T17:26:36.653Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "FinanceService.cs",
               "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\Services\\FinanceService.cs",
               "RelativeDocumentMoniker": "FinanceTracker.wpf\\Services\\FinanceService.cs",
@@ -120,8 +106,7 @@
               "RelativeToolTip": "FinanceTracker.wpf\\Services\\FinanceService.cs",
               "ViewState": "AgIAAHEAAAAAAAAAAAAmwI0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-20T21:56:34.926Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-20T21:56:34.926Z"
             },
             {
               "$type": "Document",
@@ -132,12 +117,11 @@
               "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\MainWindow.xaml",
               "RelativeToolTip": "FinanceTracker.wpf\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-02-26T21:07:54.731Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-26T21:07:54.731Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "AccountSummaryView.xaml.cs",
               "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\Views\\AccountSummaryView.xaml.cs",
               "RelativeDocumentMoniker": "FinanceTracker.wpf\\Views\\AccountSummaryView.xaml.cs",
@@ -145,8 +129,7 @@
               "RelativeToolTip": "FinanceTracker.wpf\\Views\\AccountSummaryView.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-26T21:36:50.443Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-26T21:36:50.443Z"
             },
             {
               "$type": "Document",
@@ -158,8 +141,7 @@
               "RelativeToolTip": "FinanceTracker.wpf\\Services\\IFinanceService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-20T21:53:18.793Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-20T21:53:18.793Z"
             },
             {
               "$type": "Document",
@@ -175,7 +157,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "BalanceToBrushConverter.cs",
               "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\Converter\\BalanceToBrushConverter.cs",
               "RelativeDocumentMoniker": "FinanceTracker.wpf\\Converter\\BalanceToBrushConverter.cs",
@@ -183,8 +165,32 @@
               "RelativeToolTip": "FinanceTracker.wpf\\Converter\\BalanceToBrushConverter.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-26T21:58:04.725Z",
+              "WhenOpened": "2026-02-26T21:58:04.725Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainViewModel.cs",
+              "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
+              "RelativeDocumentMoniker": "FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
+              "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
+              "RelativeToolTip": "FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAADwv2oAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-22T17:23:49.501Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "FinanceTracker.wpf\\MainWindow.xaml.cs",
+              "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\MainWindow.xaml.cs",
+              "RelativeToolTip": "FinanceTracker.wpf\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-23T19:06:53.155Z"
             },
             {
               "$type": "Document",
@@ -197,19 +203,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-19T19:53:22.788Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "MainViewModel.cs",
-              "DocumentMoniker": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
-              "RelativeDocumentMoniker": "FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
-              "ToolTip": "D:\\pet-project\\FinanceTracker\\FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
-              "RelativeToolTip": "FinanceTracker.wpf\\ViewModels\\MainViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJgAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-22T17:23:49.501Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",

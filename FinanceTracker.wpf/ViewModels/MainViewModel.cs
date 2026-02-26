@@ -103,6 +103,8 @@ namespace FinanceTracker.wpf.ViewModels
             var balances = await _financeService.GetAccountBalancesAsync();
             foreach (var b in balances)
                 AccountBalances.Add(b);
+
+            TotalBalance = AccountBalances.Sum(b => b.Balance);
         }
 
         public async Task AddAsync()
@@ -155,5 +157,11 @@ namespace FinanceTracker.wpf.ViewModels
         }
 
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
+
+        private decimal _totalBalance;
+        public decimal TotalBalance {
+            get => _totalBalance;
+            set { _totalBalance = value; OnPropertyChanged(); }
+        }
     }
 }

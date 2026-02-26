@@ -32,6 +32,19 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+
+            <Separator Margin="0,8,0,4"/>
+
+            <DockPanel>
+                <TextBlock Text="Total:"
+                           FontWeight="Bold"
+                           DockPanel.Dock="Left"/>
+
+                <TextBlock Text="{Binding TotalBalance}"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Right"
+                           Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
+            </DockPanel>
         </StackPanel>
     </Border>
 </UserControl>
