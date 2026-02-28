@@ -158,9 +158,20 @@
                 </DataGrid>
             </Border>
 
-            <!-- UserControl з акаунтами -->
-            <views:AccountSummaryView Grid.Column="1"
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Accounts -->
+                <views:AccountSummaryView Grid.Row="0"
                               DataContext="{Binding}"/>
+
+                <!-- Categories -->
+                <views:CategorySummaryView Grid.Row="1"
+                               DataContext="{Binding}"/>
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>

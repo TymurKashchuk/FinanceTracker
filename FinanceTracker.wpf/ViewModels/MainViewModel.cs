@@ -105,6 +105,14 @@ namespace FinanceTracker.wpf.ViewModels
                 AccountBalances.Add(b);
 
             TotalBalance = AccountBalances.Sum(b => b.Balance);
+
+            CategorySummaries.Clear();
+            var catSummaries = await _financeService.GetCategorySummariesAsync(FromDate, ToDate);
+            foreach (var c in catSummaries)
+                CategorySummaries.Add(c);
+
+            TotalIncome = catSummaries.Where(c => c.IsIncome).Sum(c => c.TotalAmount);
+            TotalExpenses = catSummaries.Where(c => !c.IsIncome).Sum(c => Math.Abs(c.TotalAmount));
         }
 
         public async Task AddAsync()
@@ -159,9 +167,25 @@ namespace FinanceTracker.wpf.ViewModels
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
 
         private decimal _totalBalance;
-        public decimal TotalBalance {
+        public decimal TotalBalance
+        {
             get => _totalBalance;
             set { _totalBalance = value; OnPropertyChanged(); }
+        }
+
+        public ObservableCollection<CategorySummaryDto> CategorySummaries { get; } = new();
+        private decimal _totalIncome;
+        public decimal TotalIncome
+        {
+
+            get => _totalIncome;
+            set { _totalIncome = value; OnPropertyChanged(); }
+        }
+        private decimal _totalExpenses;
+        public decimal TotalExpenses
+        {
+            get => _totalExpenses;
+            set { _totalExpenses = value; OnPropertyChanged(); }
         }
     }
 }
