@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FinanceTracker.wpf.Data;
 using FinanceTracker.wpf.Models;
 using Microsoft.EntityFrameworkCore;
+using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.Services
 {
@@ -138,6 +139,44 @@ namespace FinanceTracker.wpf.Services
                 .ToList();
 
             return balances;
+        }
+
+        public class CategorySummaryDto { 
+            public int CategoryId { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public bool IsIncome { get; set; }
+            public decimal TotalAmount { get; set; }
+        }
+
+        public async Task<List<CategorySummaryDto>> GetCategorySummariesAsync(DateTime? from = null, DateTime? to = null) {
+
+            using var db = new AppDbContext();
+            var transactions = await db.Transactions
+        .Include(t => t.Category)
+        .ToListAsync();
+
+            if (from.HasValue)
+                transactions = transactions.Where(t => t.Date >= from.Value).ToList();
+            if (to.HasValue)
+                transactions = transactions.Where(t => t.Date <= to.Value).ToList();
+
+            var categories = await db.Categories.ToListAsync();
+
+            var summaries = categories
+                .Select(c => new CategorySummaryDto
+                {
+                    CategoryId = c.Id,
+                    Name = c.Name,
+                    IsIncome = c.IsIncome,
+                    TotalAmount = transactions
+                        .Where(t => t.CategoryId == c.Id)
+                        .Sum(t => t.IsIncome ? t.Amount : -t.Amount)
+                })
+                .Where(s => s.TotalAmount != 0)  // тільки категорії, де були рухи
+                .OrderByDescending(s => Math.Abs(s.TotalAmount))
+                .ToList();
+
+            return summaries;
         }
 
     }
