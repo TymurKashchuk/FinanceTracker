@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FinanceTracker.wpf.Models;
-using FinanceTracker.wpf.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -25,6 +24,15 @@ namespace FinanceTracker.wpf.ViewModels
 
     public class MainViewModel : INotifyPropertyChanged
     {
+        public string CurrentPeriodText => SelectedPeriod switch
+        {
+            PeriodType.Today => "Today",
+            PeriodType.ThisWeek => "This week",
+            PeriodType.ThisMonth => "This month",
+            PeriodType.Last30Days => "30 days",
+            _ => "Custom"
+        };
+
         private readonly IFinanceService _financeService;
         public ObservableCollection<Transaction> Transactions { get; } = new();
 
@@ -47,12 +55,7 @@ namespace FinanceTracker.wpf.ViewModels
         public PeriodType SelectedPeriod
         {
             get => _selectedPeriod;
-            set
-            {
-                _selectedPeriod = value;
-                OnPropertyChanged();
-                UpdateDateRangeFromPeriod();
-            }
+            set { _selectedPeriod = value; OnPropertyChanged(); }
         }
 
         private Account? _selectedAccount;
@@ -128,13 +131,6 @@ namespace FinanceTracker.wpf.ViewModels
 
             Transactions.Clear();
             var items = await _financeService.GetTransactionsAsync();
-
-            if (FromDate.HasValue)
-                items = items.Where(t => t.Date >= FromDate.Value).ToList();
-
-            if (ToDate.HasValue)
-                items = items.Where(t => t.Date <= ToDate.Value).ToList();
-
             foreach (var t in items)
                 Transactions.Add(t);
 
@@ -146,7 +142,7 @@ namespace FinanceTracker.wpf.ViewModels
             TotalBalance = AccountBalances.Sum(b => b.Balance);
 
             CategorySummaries.Clear();
-            var catSummaries = await _financeService.GetCategorySummariesAsync(FromDate, ToDate);
+            var catSummaries = await _financeService.GetCategorySummariesAsync();
             foreach (var c in catSummaries)
                 CategorySummaries.Add(c);
 
@@ -175,42 +171,6 @@ namespace FinanceTracker.wpf.ViewModels
 
             Description = string.Empty;
             Amount = 0;
-        }
-
-        private DateTime? _fromDate;
-        private DateTime? _toDate;
-        public DateTime? FromDate
-        {
-            get => _fromDate;
-            set { _fromDate = value; OnPropertyChanged(); }
-        }
-
-        public DateTime? ToDate
-        {
-            get => _toDate;
-            set { _toDate = value; OnPropertyChanged(); }
-        }
-
-        private void UpdateDateRangeFromPeriod()
-        {
-            var now = DateTime.Now;
-            FromDate = SelectedPeriod switch
-            {
-                PeriodType.Today => now.Date,
-                PeriodType.ThisWeek => now.Date.AddDays(-(int)now.DayOfWeek),
-                PeriodType.ThisMonth => new DateTime(now.Year, now.Month, 1),
-                PeriodType.Last30Days => now.Date.AddDays(-30),
-                _ => FromDate
-            };
-
-            ToDate = SelectedPeriod switch
-            {
-                PeriodType.Today => now.Date,
-                PeriodType.ThisWeek => now.Date,
-                PeriodType.ThisMonth => now.Date,
-                PeriodType.Last30Days => now.Date,
-                _ => ToDate
-            };
         }
 
         public bool IsIncome
