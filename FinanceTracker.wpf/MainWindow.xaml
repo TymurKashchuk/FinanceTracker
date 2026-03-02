@@ -16,7 +16,6 @@
     </Window.DataContext>
 
     <Window.Resources>
-
         <!-- Стиль кнопок -->
         <Style TargetType="Button">
             <Setter Property="Background" Value="#4F46E5"/>
@@ -26,6 +25,16 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Кнопки пресетів дат (менші) -->
+        <Style x:Key="PeriodButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#E5E7EB"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
         </Style>
 
         <!-- Загальний розмір шрифту -->
@@ -43,10 +52,6 @@
             <Setter Property="Margin" Value="0,0,10,0"/>
         </Style>
 
-        <Style TargetType="DatePicker">
-            <Setter Property="Margin" Value="0,0,10,0"/>
-        </Style>
-
         <Style TargetType="DataGrid">
             <Setter Property="Margin" Value="0,10,0,0"/>
             <Setter Property="RowBackground" Value="White"/>
@@ -54,7 +59,6 @@
             <Setter Property="GridLinesVisibility" Value="None"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
         </Style>
-
     </Window.Resources>
 
     <DockPanel Margin="20">
@@ -91,11 +95,24 @@
                               Margin="0,0,10,0"
                               IsChecked="{Binding IsIncome}"/>
 
-                    <DatePicker Width="130"
-                                SelectedDate="{Binding FromDate}"/>
+                    <!-- НОВИЙ ВИБІР ПЕРІОДУ -->
+                    <ComboBox Width="110"
+                              ItemsSource="{Binding PeriodTypes}"
+                              SelectedItem="{Binding SelectedPeriod}"/>
 
-                    <DatePicker Width="130"
-                                SelectedDate="{Binding ToDate}"/>
+                    <!-- Пресет кнопки -->
+                    <Button Content="Today" 
+                            Width="70" 
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodTodayCommand}"/>
+                    <Button Content="Week" 
+                            Width="70" 
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodWeekCommand}"/>
+                    <Button Content="Month" 
+                            Width="70" 
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodMonthCommand}"/>
 
                 </WrapPanel>
 
@@ -117,7 +134,7 @@
             </StackPanel>
         </Border>
 
-        <!-- Таблиця -->
+        <!-- Таблиця (без змін) -->
         <Grid Margin="0,15,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
@@ -126,15 +143,15 @@
 
             <!-- Таблиця транзакцій -->
             <Border Background="White"
-            CornerRadius="8"
-            Padding="10"
-            Grid.Column="0"
-            Margin="0,0,10,0">
+                    CornerRadius="8"
+                    Padding="10"
+                    Grid.Column="0"
+                    Margin="0,0,10,0">
 
                 <DataGrid ItemsSource="{Binding Transactions}"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  IsReadOnly="True">
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          IsReadOnly="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Description"
                                     Binding="{Binding Description}"

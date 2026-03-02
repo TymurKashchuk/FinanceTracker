@@ -14,16 +14,46 @@ using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
 {
+    public enum PeriodType
+    {
+        Today,
+        ThisWeek,
+        ThisMonth,
+        Last30Days,
+        Custom
+    }
+
     public class MainViewModel : INotifyPropertyChanged
     {
         private readonly IFinanceService _financeService;
         public ObservableCollection<Transaction> Transactions { get; } = new();
 
         private string _description = string.Empty;
-
         private bool _isIncome = true;
+
         public ObservableCollection<Account> Accounts { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
+
+        public ObservableCollection<PeriodType> PeriodTypes { get; } = new()
+        {
+            PeriodType.Today,
+            PeriodType.ThisWeek,
+            PeriodType.ThisMonth,
+            PeriodType.Last30Days,
+            PeriodType.Custom
+        };
+
+        private PeriodType _selectedPeriod = PeriodType.ThisMonth;
+        public PeriodType SelectedPeriod
+        {
+            get => _selectedPeriod;
+            set
+            {
+                _selectedPeriod = value;
+                OnPropertyChanged();
+                UpdateDateRangeFromPeriod();
+            }
+        }
 
         private Account? _selectedAccount;
         public Account? SelectedAccount
@@ -38,6 +68,7 @@ namespace FinanceTracker.wpf.ViewModels
             get => _selectedCategory;
             set { _selectedCategory = value; OnPropertyChanged(); }
         }
+
         public string Description
         {
             get => _description;
@@ -51,6 +82,9 @@ namespace FinanceTracker.wpf.ViewModels
             set { _amount = value; OnPropertyChanged(); }
         }
 
+        public ICommand SetPeriodTodayCommand { get; private set; }
+        public ICommand SetPeriodWeekCommand { get; private set; }
+        public ICommand SetPeriodMonthCommand { get; private set; }
         public ICommand LoadCommand { get; }
         public ICommand AddCommand { get; }
 
@@ -60,6 +94,11 @@ namespace FinanceTracker.wpf.ViewModels
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
             AddCommand = new RelayCommand(async _ => await AddAsync());
+
+            SetPeriodTodayCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.Today);
+            SetPeriodWeekCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.ThisWeek);
+            SetPeriodMonthCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.ThisMonth);
+
             _ = InitializeAsync();
         }
 
@@ -118,10 +157,7 @@ namespace FinanceTracker.wpf.ViewModels
         public async Task AddAsync()
         {
             if (string.IsNullOrWhiteSpace(Description)) return;
-
-            if (Amount <= 0)
-                return;
-
+            if (Amount <= 0) return;
             if (SelectedAccount == null || SelectedCategory == null) return;
 
             var transaction = new Transaction
@@ -154,9 +190,28 @@ namespace FinanceTracker.wpf.ViewModels
             get => _toDate;
             set { _toDate = value; OnPropertyChanged(); }
         }
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        private void UpdateDateRangeFromPeriod()
+        {
+            var now = DateTime.Now;
+            FromDate = SelectedPeriod switch
+            {
+                PeriodType.Today => now.Date,
+                PeriodType.ThisWeek => now.Date.AddDays(-(int)now.DayOfWeek),
+                PeriodType.ThisMonth => new DateTime(now.Year, now.Month, 1),
+                PeriodType.Last30Days => now.Date.AddDays(-30),
+                _ => FromDate
+            };
+
+            ToDate = SelectedPeriod switch
+            {
+                PeriodType.Today => now.Date,
+                PeriodType.ThisWeek => now.Date,
+                PeriodType.ThisMonth => now.Date,
+                PeriodType.Last30Days => now.Date,
+                _ => ToDate
+            };
+        }
 
         public bool IsIncome
         {
@@ -165,7 +220,6 @@ namespace FinanceTracker.wpf.ViewModels
         }
 
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
-
         private decimal _totalBalance;
         public decimal TotalBalance
         {
@@ -177,7 +231,6 @@ namespace FinanceTracker.wpf.ViewModels
         private decimal _totalIncome;
         public decimal TotalIncome
         {
-
             get => _totalIncome;
             set { _totalIncome = value; OnPropertyChanged(); }
         }
@@ -187,5 +240,9 @@ namespace FinanceTracker.wpf.ViewModels
             get => _totalExpenses;
             set { _totalExpenses = value; OnPropertyChanged(); }
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
