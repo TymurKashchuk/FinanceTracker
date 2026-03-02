@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FinanceTracker.wpf.Models;
-using FinanceTracker.wpf.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -14,16 +13,50 @@ using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
 {
+    public enum PeriodType
+    {
+        Today,
+        ThisWeek,
+        ThisMonth,
+        Last30Days,
+        Custom
+    }
+
     public class MainViewModel : INotifyPropertyChanged
     {
+        public string CurrentPeriodText => SelectedPeriod switch
+        {
+            PeriodType.Today => "Today",
+            PeriodType.ThisWeek => "This week",
+            PeriodType.ThisMonth => "This month",
+            PeriodType.Last30Days => "30 days",
+            _ => "Custom"
+        };
+
         private readonly IFinanceService _financeService;
         public ObservableCollection<Transaction> Transactions { get; } = new();
 
         private string _description = string.Empty;
-
         private bool _isIncome = true;
+
         public ObservableCollection<Account> Accounts { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
+
+        public ObservableCollection<PeriodType> PeriodTypes { get; } = new()
+        {
+            PeriodType.Today,
+            PeriodType.ThisWeek,
+            PeriodType.ThisMonth,
+            PeriodType.Last30Days,
+            PeriodType.Custom
+        };
+
+        private PeriodType _selectedPeriod = PeriodType.ThisMonth;
+        public PeriodType SelectedPeriod
+        {
+            get => _selectedPeriod;
+            set { _selectedPeriod = value; OnPropertyChanged(); }
+        }
 
         private Account? _selectedAccount;
         public Account? SelectedAccount
@@ -38,6 +71,7 @@ namespace FinanceTracker.wpf.ViewModels
             get => _selectedCategory;
             set { _selectedCategory = value; OnPropertyChanged(); }
         }
+
         public string Description
         {
             get => _description;
@@ -51,6 +85,9 @@ namespace FinanceTracker.wpf.ViewModels
             set { _amount = value; OnPropertyChanged(); }
         }
 
+        public ICommand SetPeriodTodayCommand { get; private set; }
+        public ICommand SetPeriodWeekCommand { get; private set; }
+        public ICommand SetPeriodMonthCommand { get; private set; }
         public ICommand LoadCommand { get; }
         public ICommand AddCommand { get; }
 
@@ -60,6 +97,11 @@ namespace FinanceTracker.wpf.ViewModels
 
             LoadCommand = new RelayCommand(async _ => await LoadAsync());
             AddCommand = new RelayCommand(async _ => await AddAsync());
+
+            SetPeriodTodayCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.Today);
+            SetPeriodWeekCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.ThisWeek);
+            SetPeriodMonthCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.ThisMonth);
+
             _ = InitializeAsync();
         }
 
@@ -89,13 +131,6 @@ namespace FinanceTracker.wpf.ViewModels
 
             Transactions.Clear();
             var items = await _financeService.GetTransactionsAsync();
-
-            if (FromDate.HasValue)
-                items = items.Where(t => t.Date >= FromDate.Value).ToList();
-
-            if (ToDate.HasValue)
-                items = items.Where(t => t.Date <= ToDate.Value).ToList();
-
             foreach (var t in items)
                 Transactions.Add(t);
 
@@ -107,7 +142,7 @@ namespace FinanceTracker.wpf.ViewModels
             TotalBalance = AccountBalances.Sum(b => b.Balance);
 
             CategorySummaries.Clear();
-            var catSummaries = await _financeService.GetCategorySummariesAsync(FromDate, ToDate);
+            var catSummaries = await _financeService.GetCategorySummariesAsync();
             foreach (var c in catSummaries)
                 CategorySummaries.Add(c);
 
@@ -118,10 +153,7 @@ namespace FinanceTracker.wpf.ViewModels
         public async Task AddAsync()
         {
             if (string.IsNullOrWhiteSpace(Description)) return;
-
-            if (Amount <= 0)
-                return;
-
+            if (Amount <= 0) return;
             if (SelectedAccount == null || SelectedCategory == null) return;
 
             var transaction = new Transaction
@@ -141,23 +173,6 @@ namespace FinanceTracker.wpf.ViewModels
             Amount = 0;
         }
 
-        private DateTime? _fromDate;
-        private DateTime? _toDate;
-        public DateTime? FromDate
-        {
-            get => _fromDate;
-            set { _fromDate = value; OnPropertyChanged(); }
-        }
-
-        public DateTime? ToDate
-        {
-            get => _toDate;
-            set { _toDate = value; OnPropertyChanged(); }
-        }
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
         public bool IsIncome
         {
             get => _isIncome;
@@ -165,7 +180,6 @@ namespace FinanceTracker.wpf.ViewModels
         }
 
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
-
         private decimal _totalBalance;
         public decimal TotalBalance
         {
@@ -177,7 +191,6 @@ namespace FinanceTracker.wpf.ViewModels
         private decimal _totalIncome;
         public decimal TotalIncome
         {
-
             get => _totalIncome;
             set { _totalIncome = value; OnPropertyChanged(); }
         }
@@ -187,5 +200,9 @@ namespace FinanceTracker.wpf.ViewModels
             get => _totalExpenses;
             set { _totalExpenses = value; OnPropertyChanged(); }
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
