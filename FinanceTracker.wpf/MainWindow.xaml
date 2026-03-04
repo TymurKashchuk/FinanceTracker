@@ -7,7 +7,7 @@
         xmlns:views="clr-namespace:FinanceTracker.wpf.Views"
         mc:Ignorable="d"
         Title="Finance Tracker"
-        Height="500"
+        Height="600"
         Width="1150"
         Background="#F5F6FA">
 
@@ -59,11 +59,17 @@
             <Setter Property="GridLinesVisibility" Value="None"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
         </Style>
+
+        <!-- Стиль вкладок -->
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
     </Window.Resources>
 
     <DockPanel Margin="20">
 
-        <!-- Верхня панель -->
+        <!-- Верхня панель-->
         <Border Background="White"
                 CornerRadius="8"
                 Padding="15"
@@ -139,37 +145,22 @@
             </StackPanel>
         </Border>
 
-        <Grid Margin="0,15,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- Вкладки -->
+        <TabControl DockPanel.Dock="Top"
+                    Margin="0,15,0,0"
+                    Background="Transparent"
+                    BorderBrush="Transparent">
+            <TabItem Header="Home">
+                <views:HomeView />
+            </TabItem>
+            
+            <TabItem Header="Transactions">
+                <views:TransactionsView />
+            </TabItem>
 
-            <Border Background="White" CornerRadius="8" Padding="10" 
-                    Grid.Column="0" Margin="0,0,10,0">
-                <DataGrid ItemsSource="{Binding Transactions}"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
-                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="100"/>
-                        <DataGridCheckBoxColumn Header="Income" Binding="{Binding IsIncome}" Width="80"/>
-                        <DataGridTextColumn Header="Account" Binding="{Binding Account.Name}" Width="120"/>
-                        <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="120"/>
-                        <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="150"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <views:AccountSummaryView Grid.Row="0" DataContext="{Binding}"/>
-                <views:CategorySummaryView Grid.Row="1" DataContext="{Binding}"/>
-            </Grid>
-        </Grid>
+            <TabItem Header="Summary">
+                <views:SummaryView DataContext="{Binding}"/>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </Window>
