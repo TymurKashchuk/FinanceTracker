@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="FinanceTracker.wpf.Views.SummaryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:MainViewModel}"
+             d:DesignHeight="400" d:DesignWidth="400"
+             Background="Transparent">
+    <Border Background="White" CornerRadius="8" Padding="15">
+        <StackPanel>
+            <TextBlock Text="Summary" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+
+            <TextBlock Text="{Binding CurrentPeriodText}" FontWeight="Medium" Margin="0,0,0,5"/>
+
+            <TextBlock Text="{Binding TotalBalance, StringFormat='Balance: {0:C}'}" Margin="0,0,0,3"/>
+            <TextBlock Text="{Binding TotalIncome, StringFormat='Income: {0:C}'}" Margin="0,0,0,3"/>
+            <TextBlock Text="{Binding TotalExpenses, StringFormat='Expenses: {0:C}'}" Margin="0,0,0,3"/>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -23,8 +23,10 @@ namespace FinanceTracker.wpf.Services
         public async Task AddTransactionAsync(Transaction transaction)
         {
             using var db = new AppDbContext();
+            transaction.Account = null!;
+            transaction.Category = null;
 
-            if(!await db.Accounts.AnyAsync())
+            if (!await db.Accounts.AnyAsync())
             {
                 db.Accounts.AddRange(
                     new Account { Name = "Cash" },
@@ -34,12 +36,13 @@ namespace FinanceTracker.wpf.Services
                 await db.SaveChangesAsync();
             }
 
-            if (!await db.Categories.AnyAsync()) {
+            if (!await db.Categories.AnyAsync())
+            {
                 db.Categories.AddRange(
-                    new Category { Name = "General", IsIncome = false},
-                    new Category { Name = "Food", IsIncome = false},
+                    new Category { Name = "General", IsIncome = false },
+                    new Category { Name = "Food", IsIncome = false },
                     new Category { Name = "Transport", IsIncome = false },
-                    new Category { Name = "Salary", IsIncome = true}
+                    new Category { Name = "Salary", IsIncome = true }
                 );
                 await db.SaveChangesAsync();
             }
@@ -50,14 +53,9 @@ namespace FinanceTracker.wpf.Services
                 transaction.AccountId = defaultAccount.Id;
             }
 
-            if (transaction.CategoryId == 0)
-            {
-                var defaultCategory = await db.Categories.OrderBy(c => c.Id).FirstAsync();
-                transaction.CategoryId = defaultCategory.Id;
-            }
-
             db.Transactions.Add(transaction);
             await db.SaveChangesAsync();
+
         }
 
         public async Task SeedAsync()
@@ -86,7 +84,6 @@ namespace FinanceTracker.wpf.Services
             await db.SaveChangesAsync();
         }
 
-
         public async Task DeleteTransactionAsync(int id)
         {
             using var db = new AppDbContext();
@@ -98,21 +95,24 @@ namespace FinanceTracker.wpf.Services
             }
         }
 
-        public async Task<List<Account>> GetAccountsAsync() {
+        public async Task<List<Account>> GetAccountsAsync()
+        {
             using var db = new AppDbContext();
             return await db.Accounts
                 .OrderBy(a => a.Name)
                 .ToListAsync();
         }
 
-        public async Task<List<Category>> GetCategoriesAsync() {
+        public async Task<List<Category>> GetCategoriesAsync()
+        {
             using var db = new AppDbContext();
             return await db.Categories
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
 
-        public class AccountBalanceDto { 
+        public class AccountBalanceDto
+        {
             public int AccountId { get; set; }
             public string Name { get; set; } = string.Empty;
             public decimal Balance { get; set; }
@@ -141,19 +141,20 @@ namespace FinanceTracker.wpf.Services
             return balances;
         }
 
-        public class CategorySummaryDto { 
+        public class CategorySummaryDto
+        {
             public int CategoryId { get; set; }
             public string Name { get; set; } = string.Empty;
             public bool IsIncome { get; set; }
             public decimal TotalAmount { get; set; }
         }
 
-        public async Task<List<CategorySummaryDto>> GetCategorySummariesAsync(DateTime? from = null, DateTime? to = null) {
-
+        public async Task<List<CategorySummaryDto>> GetCategorySummariesAsync(DateTime? from = null, DateTime? to = null)
+        {
             using var db = new AppDbContext();
             var transactions = await db.Transactions
-        .Include(t => t.Category)
-        .ToListAsync();
+                .Include(t => t.Category)
+                .ToListAsync();
 
             if (from.HasValue)
                 transactions = transactions.Where(t => t.Date >= from.Value).ToList();
@@ -172,12 +173,11 @@ namespace FinanceTracker.wpf.Services
                         .Where(t => t.CategoryId == c.Id)
                         .Sum(t => t.IsIncome ? t.Amount : -t.Amount)
                 })
-                .Where(s => s.TotalAmount != 0)  // тільки категорії, де були рухи
+                .Where(s => s.TotalAmount != 0)
                 .OrderByDescending(s => Math.Abs(s.TotalAmount))
                 .ToList();
 
             return summaries;
         }
-
     }
 }
