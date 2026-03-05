@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
         xmlns:views="clr-namespace:FinanceTracker.wpf.Views"
+        xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
         mc:Ignorable="d"
         Title="Finance Tracker"
         Height="600"
@@ -16,7 +17,9 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <!-- Стиль кнопок -->
+        
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <!-- Стиль кнопок -->
         <Style TargetType="Button">
             <Setter Property="Background" Value="#4F46E5"/>
             <Setter Property="Foreground" Value="White"/>
@@ -91,14 +94,17 @@
                               SelectedItem="{Binding SelectedAccount}"/>
 
                     <ComboBox Width="140"
+                              ItemsSource="{Binding TransactionTypes}"
+                              SelectedItem="{Binding TransactionType}"
+                              Margin="0,0,10,0"/>
+
+                    <ComboBox Width="140"
                               ItemsSource="{Binding Categories}"
                               DisplayMemberPath="Name"
-                              SelectedItem="{Binding SelectedCategory}"/>
+                              SelectedItem="{Binding SelectedCategory}"
+                              Visibility="{Binding IsExpenseSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    <CheckBox Content="Income"
-                              VerticalAlignment="Center"
-                              Margin="0,0,10,0"
-                              IsChecked="{Binding IsIncome}"/>
+
 
                     <!-- ПЕРІОДИ -->
                     <ComboBox Width="110"

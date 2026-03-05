@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,12 @@ namespace FinanceTracker.wpf.ViewModels
         Custom
     }
 
+    public enum TransactionType
+    {
+        Income,
+        Expense
+    }
+
     public class MainViewModel : INotifyPropertyChanged
     {
         public string CurrentPeriodText => SelectedPeriod switch
@@ -37,10 +44,16 @@ namespace FinanceTracker.wpf.ViewModels
         public ObservableCollection<Transaction> Transactions { get; } = new();
 
         private string _description = string.Empty;
-        private bool _isIncome = true;
+        private decimal _amount;
+        private TransactionType _transactionType = TransactionType.Income;
 
         public ObservableCollection<Account> Accounts { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
+        public ObservableCollection<TransactionType> TransactionTypes { get; } = new()
+        {
+            TransactionType.Income,
+            TransactionType.Expense
+        };
 
         public ObservableCollection<PeriodType> PeriodTypes { get; } = new()
         {
@@ -55,35 +68,77 @@ namespace FinanceTracker.wpf.ViewModels
         public PeriodType SelectedPeriod
         {
             get => _selectedPeriod;
-            set { _selectedPeriod = value; OnPropertyChanged(); }
+            set
+            {
+                _selectedPeriod = value;
+                OnPropertyChanged();
+            }
         }
 
         private Account? _selectedAccount;
         public Account? SelectedAccount
         {
             get => _selectedAccount;
-            set { _selectedAccount = value; OnPropertyChanged(); }
+            set
+            {
+                if (_selectedAccount == value) return;
+                _selectedAccount = value;
+                OnPropertyChanged();
+            }
         }
 
         private Category? _selectedCategory;
         public Category? SelectedCategory
         {
             get => _selectedCategory;
-            set { _selectedCategory = value; OnPropertyChanged(); }
+            set
+            {
+                if (_selectedCategory == value) return;
+                _selectedCategory = value;
+                OnPropertyChanged();
+            }
         }
 
         public string Description
         {
             get => _description;
-            set { _description = value; OnPropertyChanged(); }
+            set
+            {
+                if (_description == value) return;
+                _description = value;
+                OnPropertyChanged();
+            }
         }
 
-        private decimal _amount;
         public decimal Amount
         {
             get => _amount;
-            set { _amount = value; OnPropertyChanged(); }
+            set
+            {
+                if (_amount == value) return;
+                _amount = value;
+                OnPropertyChanged();
+            }
         }
+
+        public TransactionType TransactionType
+        {
+            get => _transactionType;
+            set
+            {
+                if (_transactionType == value) return;
+                _transactionType = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsExpenseSelected));
+
+                if (value == TransactionType.Income)
+                {
+                    SelectedCategory = null;
+                }
+            }
+        }
+
+        public bool IsExpenseSelected => TransactionType == TransactionType.Expense;
 
         public ICommand SetPeriodTodayCommand { get; private set; }
         public ICommand SetPeriodWeekCommand { get; private set; }
@@ -154,29 +209,38 @@ namespace FinanceTracker.wpf.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Description)) return;
             if (Amount <= 0) return;
-            if (SelectedAccount == null || SelectedCategory == null) return;
+            if (SelectedAccount == null) return;
 
-            var transaction = new Transaction
+            if (TransactionType == TransactionType.Expense && SelectedCategory == null)
+                return;
+
+            try
             {
-                Description = Description,
-                Amount = Amount,
-                Date = DateTime.Now,
-                IsIncome = IsIncome,
-                AccountId = SelectedAccount.Id,
-                CategoryId = SelectedCategory.Id
-            };
+                Debug.WriteLine($"AddAsync: IsIncome={TransactionType == TransactionType.Income}, AccountId={SelectedAccount.Id}, CategoryId={(TransactionType == TransactionType.Income ? "null" : SelectedCategory?.Id)}");
 
-            await _financeService.AddTransactionAsync(transaction);
-            await LoadAsync();
+                var transaction = new Transaction
+                {
+                    Description = Description,
+                    Amount = Amount,
+                    Date = DateTime.Now,
+                    IsIncome = TransactionType == TransactionType.Income,
+                    AccountId = SelectedAccount.Id,
+                    CategoryId = TransactionType == TransactionType.Income ? null : SelectedCategory?.Id
+                };
 
-            Description = string.Empty;
-            Amount = 0;
-        }
+                await _financeService.AddTransactionAsync(transaction);
+                await LoadAsync();
 
-        public bool IsIncome
-        {
-            get => _isIncome;
-            set { _isIncome = value; OnPropertyChanged(); }
+                Description = string.Empty;
+                Amount = 0;
+
+                TransactionType = TransactionType.Income;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception in AddAsync: {ex.Message}");
+                throw;
+            }
         }
 
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
@@ -184,7 +248,12 @@ namespace FinanceTracker.wpf.ViewModels
         public decimal TotalBalance
         {
             get => _totalBalance;
-            set { _totalBalance = value; OnPropertyChanged(); }
+            set
+            {
+                if (_totalBalance == value) return;
+                _totalBalance = value;
+                OnPropertyChanged();
+            }
         }
 
         public ObservableCollection<CategorySummaryDto> CategorySummaries { get; } = new();
@@ -192,17 +261,27 @@ namespace FinanceTracker.wpf.ViewModels
         public decimal TotalIncome
         {
             get => _totalIncome;
-            set { _totalIncome = value; OnPropertyChanged(); }
+            set
+            {
+                if (_totalIncome == value) return;
+                _totalIncome = value;
+                OnPropertyChanged();
+            }
         }
         private decimal _totalExpenses;
         public decimal TotalExpenses
         {
             get => _totalExpenses;
-            set { _totalExpenses = value; OnPropertyChanged(); }
+            set
+            {
+                if (_totalExpenses == value) return;
+                _totalExpenses = value;
+                OnPropertyChanged();
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

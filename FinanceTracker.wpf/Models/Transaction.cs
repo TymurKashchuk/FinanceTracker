@@ -13,7 +13,7 @@ namespace FinanceTracker.wpf.Models
         public int AccountId { get; set; }
         public Account Account { get; set; } = null!;
 
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
         public decimal Amount { get; set; }              
