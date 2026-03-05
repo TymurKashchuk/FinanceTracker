@@ -14,7 +14,7 @@ namespace FinanceTracker.wpf.Models
         public Account Account { get; set; } = null!;
 
         public int? CategoryId { get; set; }
-        public Category Category { get; set; } = null!;
+        public Category? Category { get; set; } = null!;
 
         public decimal Amount { get; set; }              
         public DateTime Date { get; set; } = DateTime.Now;

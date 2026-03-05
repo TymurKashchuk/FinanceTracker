@@ -199,10 +199,13 @@ namespace FinanceTracker.wpf.ViewModels
             CategorySummaries.Clear();
             var catSummaries = await _financeService.GetCategorySummariesAsync();
             foreach (var c in catSummaries)
+            {
+                System.Diagnostics.Debug.WriteLine($"Category: {c.Name}, IsIncome: {c.IsIncome}, TotalAmount: {c.TotalAmount}");
                 CategorySummaries.Add(c);
+            }
 
-            TotalIncome = catSummaries.Where(c => c.IsIncome).Sum(c => c.TotalAmount);
-            TotalExpenses = catSummaries.Where(c => !c.IsIncome).Sum(c => Math.Abs(c.TotalAmount));
+            TotalIncome = items.Where(t => t.IsIncome).Sum(t => t.Amount);
+            TotalExpenses = items.Where(t => !t.IsIncome).Sum(t => t.Amount);
         }
 
         public async Task AddAsync()

@@ -4,23 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
+             xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:MainViewModel}"
              d:DesignHeight="400" d:DesignWidth="800"
              Background="Transparent">
 
     <UserControl.Resources>
+        <!-- Тінь навколо блоку -->
         <DropShadowEffect x:Key="DropShadowEffect"
                           ShadowDepth="2"
                           BlurRadius="8"
                           Opacity="0.2" />
+
+        <!-- Конвертер кольору для балансу -->
+        <conv:BalanceToBrushConverter x:Key="BalanceToBrushConverter"/>
     </UserControl.Resources>
 
     <Grid Margin="5">
         <Border Background="White"
                 CornerRadius="12"
-                Padding="18"
-                Effect="{StaticResource DropShadowEffect}">
+                Padding="18">
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -30,6 +34,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
+                <!-- Заголовок + період -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,12">
                     <TextBlock Text="Finance Dashboard"
                                FontWeight="Bold"
@@ -42,6 +47,7 @@
                                Margin="0,4,0,0"/>
                 </StackPanel>
 
+                <!-- Overall Balance -->
                 <Border Grid.Row="1"
                         Background="#F9FAFB"
                         CornerRadius="10"
@@ -62,7 +68,7 @@
                             <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:C}'}"
                                        FontSize="24"
                                        FontWeight="Bold"
-                                       Foreground="#059669"/>
+                                       Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
                         </StackPanel>
 
                         <Grid Grid.Column="1" Margin="20,0,0,0">
@@ -100,17 +106,20 @@
                     </Grid>
                 </Border>
 
+                <!-- Роздільна лінія -->
                 <Border Grid.Row="2"
                         Height="1"
                         Background="#E5E7EB"
                         Margin="0,0,0,16"/>
 
+                <!-- Net + Savings -->
                 <Grid Grid.Row="3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
+                    <!-- Net -->
                     <Border Grid.Column="0"
                             Background="#F9FAFB"
                             CornerRadius="8"
@@ -125,10 +134,11 @@
                             <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:C}'}"
                                        FontSize="16"
                                        FontWeight="Bold"
-                                       Foreground="#059669"/>
+                                       Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
                         </StackPanel>
                     </Border>
 
+                    <!-- Savings -->
                     <Border Grid.Column="1"
                             Background="#F9FAFB"
                             CornerRadius="8"

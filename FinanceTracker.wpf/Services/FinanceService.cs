@@ -23,6 +23,8 @@ namespace FinanceTracker.wpf.Services
         public async Task AddTransactionAsync(Transaction transaction)
         {
             using var db = new AppDbContext();
+            transaction.Account = null!;
+            transaction.Category = null;
 
             if (!await db.Accounts.AnyAsync())
             {
@@ -53,6 +55,7 @@ namespace FinanceTracker.wpf.Services
 
             db.Transactions.Add(transaction);
             await db.SaveChangesAsync();
+
         }
 
         public async Task SeedAsync()
