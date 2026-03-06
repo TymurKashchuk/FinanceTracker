@@ -10,12 +10,18 @@ namespace FinanceTracker.wpf.Services
 {
     public class FinanceService : IFinanceService
     {
-        public async Task<List<Transaction>> GetTransactionsAsync()
+        public async Task<List<Transaction>> GetTransactionsAsync(DateTime? from = null, DateTime? to =null)
         {
             using var db = new AppDbContext();
-            return await db.Transactions
+            var query = db.Transactions
                 .Include(t => t.Account)
                 .Include(t => t.Category)
+            as IQueryable<Transaction>;
+
+            if (from.HasValue) query = query.Where(t => t.Date >= from.Value);
+            if (to.HasValue) query = query.Where(t => t.Date <= to.Value);
+
+            return await query
                 .OrderByDescending(t => t.Date)
                 .ToListAsync();
         }

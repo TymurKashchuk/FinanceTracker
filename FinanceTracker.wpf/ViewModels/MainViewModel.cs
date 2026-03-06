@@ -72,6 +72,7 @@ namespace FinanceTracker.wpf.ViewModels
             {
                 _selectedPeriod = value;
                 OnPropertyChanged();
+                _ = LoadAsync();
             }
         }
 
@@ -184,8 +185,21 @@ namespace FinanceTracker.wpf.ViewModels
             if (SelectedCategory == null && Categories.Any())
                 SelectedCategory = Categories.First();
 
+            (DateTime? from, DateTime? to) period = SelectedPeriod switch
+            {
+                PeriodType.Today => (DateTime.Now.Date, DateTime.Now.Date.AddDays(1).AddTicks(-1)),
+
+                PeriodType.ThisWeek => (StartOfWeek(DateTime.Now), EndOfWeek(DateTime.Now)),
+
+                PeriodType.ThisMonth => (StartOfMonth(DateTime.Now), EndOfMonth(DateTime.Now)),
+
+                PeriodType.Last30Days => (DateTime.Now.AddDays(-30), DateTime.Now),
+
+                _ => (null, null)
+            };
+
             Transactions.Clear();
-            var items = await _financeService.GetTransactionsAsync();
+            var items = await _financeService.GetTransactionsAsync(period.from, period.to);
             foreach (var t in items)
                 Transactions.Add(t);
 
@@ -197,7 +211,7 @@ namespace FinanceTracker.wpf.ViewModels
             TotalBalance = AccountBalances.Sum(b => b.Balance);
 
             CategorySummaries.Clear();
-            var catSummaries = await _financeService.GetCategorySummariesAsync();
+            var catSummaries = await _financeService.GetCategorySummariesAsync(period.from, period.to);
             foreach (var c in catSummaries)
             {
                 System.Diagnostics.Debug.WriteLine($"Category: {c.Name}, IsIncome: {c.IsIncome}, TotalAmount: {c.TotalAmount}");
@@ -286,5 +300,25 @@ namespace FinanceTracker.wpf.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        public static DateTime StartOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday) {
+            var diff = (int)(dt.DayOfWeek - firstDayOfWeek);
+            if (diff < 0) diff += 7;
+            return dt.AddDays(-diff).Date;//поверення початку тмжня
+        }
+        public static DateTime EndOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday) {
+            var start = StartOfWeek(dt, firstDayOfWeek);
+            return start.AddDays(6).Date.AddDays(1).AddTicks(-1);
+        }
+
+        public static DateTime StartOfMonth(DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, 1);
+        }
+
+        public static DateTime EndOfMonth(DateTime dt)
+        {
+            return StartOfMonth(dt).AddMonths(1).AddTicks(-1);
+        }
     }
 }
