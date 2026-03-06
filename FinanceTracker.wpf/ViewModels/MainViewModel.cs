@@ -286,5 +286,25 @@ namespace FinanceTracker.wpf.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        public static DateTime StartOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday) {
+            var diff = (int)(dt.DayOfWeek - firstDayOfWeek);
+            if (diff < 0) diff += 7;
+            return dt.AddDays(-diff).Date;//поверення початку тмжня
+        }
+        public static DateTime EndOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday) {
+            var start = StartOfWeek(dt, firstDayOfWeek);
+            return start.AddDays(6).Date.AddDays(1).AddTicks(-1);
+        }
+
+        public static DateTime StartOfMonth(DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, 1);
+        }
+
+        public static DateTime EndOfMonth(DateTime dt)
+        {
+            return StartOfMonth(dt).AddMonths(1).AddTicks(-1);
+        }
     }
 }

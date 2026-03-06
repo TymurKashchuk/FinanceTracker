@@ -7,7 +7,7 @@ namespace FinanceTracker.wpf.Services
 {
     public interface IFinanceService
     {
-        Task<List<Transaction>> GetTransactionsAsync();
+        Task<List<Transaction>> GetTransactionsAsync(DateTime? from = null, DateTime? to = null);
         Task AddTransactionAsync(Transaction transaction);
         Task DeleteTransactionAsync(int id);
         Task<List<Account>> GetAccountsAsync();
