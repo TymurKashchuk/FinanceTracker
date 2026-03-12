@@ -5,18 +5,52 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance vm:MainViewModel}"
-             d:DesignHeight="400" d:DesignWidth="400"
-             Background="Transparent">
-    <Border Background="White" CornerRadius="8" Padding="15">
-        <StackPanel>
-            <TextBlock Text="Summary" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10"/>
+             d:DataContext="{d:DesignInstance vm:MainViewModel}">
 
-            <TextBlock Text="{Binding CurrentPeriodText}" FontWeight="Medium" Margin="0,0,0,5"/>
+    <Grid Margin="20">
+        <Border Background="White" CornerRadius="12" Padding="20">
+            <StackPanel>
+                <TextBlock Text="Category Summary" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,0,0,20"/>
 
-            <TextBlock Text="{Binding TotalBalance, StringFormat='Balance: {0:C}'}" Margin="0,0,0,3"/>
-            <TextBlock Text="{Binding TotalIncome, StringFormat='Income: {0:C}'}" Margin="0,0,0,3"/>
-            <TextBlock Text="{Binding TotalExpenses, StringFormat='Expenses: {0:C}'}" Margin="0,0,0,3"/>
-        </StackPanel>
-    </Border>
+                <!-- Таблиця топ витрат -->
+                <DataGrid ItemsSource="{Binding TopExpenseCategories}" 
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="None"
+                          HeadersVisibility="Column"
+                          CanUserResizeColumns="False"
+                          Margin="0,0,0,20">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Category" 
+                                          Binding="{Binding Name}" 
+                                          Width="*"/>
+                        <DataGridTextColumn Header="Amount" 
+                                          Binding="{Binding Amount, StringFormat={}{0:C}}" 
+                                          Width="120"/>
+                        <DataGridTextColumn Header="% of total" 
+                                          Binding="{Binding Percentage, StringFormat={}{0:F1}%}" 
+                                          Width="100"/>
+                    </DataGrid.Columns>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="White"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Amount}" Value="0">
+                                    <Setter Property="Foreground" Value="#6B7280"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
+
+                <TextBlock Text="{Binding CurrentPeriodText}" 
+                           FontSize="14" 
+                           Foreground="#6B7280" 
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

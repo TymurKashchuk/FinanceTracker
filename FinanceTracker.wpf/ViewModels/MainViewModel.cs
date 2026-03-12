@@ -220,6 +220,19 @@ namespace FinanceTracker.wpf.ViewModels
 
             TotalIncome = items.Where(t => t.IsIncome).Sum(t => t.Amount);
             TotalExpenses = items.Where(t => !t.IsIncome).Sum(t => t.Amount);
+            TopExpenseCategories.Clear();
+            var expenses = catSummaries.Where(c => !c.IsIncome && c.TotalAmount < 0).ToList();
+            var totalExpenses = expenses.Sum(c => Math.Abs(c.TotalAmount));
+
+            foreach (var cat in expenses.OrderByDescending(c => Math.Abs(c.TotalAmount)).Take(5))
+            {
+                TopExpenseCategories.Add(new TopExpenseCategory
+                {
+                    Name = cat.Name,
+                    Amount = Math.Abs(cat.TotalAmount),
+                    Percentage = totalExpenses > 0 ? (double)(Math.Abs(cat.TotalAmount) / totalExpenses * 100) : 0
+                });
+            }
         }
 
         public async Task AddAsync()
@@ -285,6 +298,16 @@ namespace FinanceTracker.wpf.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
+
+        public class TopExpenseCategory
+        {
+            public string Name { get; set; } = string.Empty;
+            public decimal Amount { get; set; }
+            public double Percentage { get; set; }
+        }
+
         private decimal _totalExpenses;
         public decimal TotalExpenses
         {
