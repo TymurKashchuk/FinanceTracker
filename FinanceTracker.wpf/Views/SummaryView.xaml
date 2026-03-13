@@ -9,47 +9,76 @@
 
     <Grid Margin="20">
         <Border Background="White" CornerRadius="12" Padding="20">
+
             <StackPanel>
-                <TextBlock Text="Category Summary" 
-                           FontSize="24" 
-                           FontWeight="Bold" 
-                           HorizontalAlignment="Center" 
+
+                <!-- Заголовок -->
+                <TextBlock Text="Category Summary"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
                            Margin="0,0,0,20"/>
 
-                <!-- Таблиця топ витрат -->
-                <DataGrid ItemsSource="{Binding TopExpenseCategories}" 
+                <!-- Найбільша категорія витрат -->
+                <Border Background="#FEF3C7"
+                        CornerRadius="10"
+                        Padding="12"
+                        Margin="0,0,0,20">
+
+                    <StackPanel Orientation="Horizontal">
+
+                        <TextBlock Text="Biggest expense:"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,10,0"/>
+
+                        <TextBlock Text="{Binding TopExpenseCategoryName}"
+                                   FontWeight="Bold"/>
+
+                        <TextBlock Text=" - "
+                                   Margin="5,0"/>
+
+                        <TextBlock Text="{Binding TopExpenseCategoryAmount, StringFormat={}{0:C}}"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- Топ витрати -->
+                <TextBlock Text="Top Expenses"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,15"/>
+
+                <DataGrid ItemsSource="{Binding TopExpenseCategories}"
                           AutoGenerateColumns="False"
                           GridLinesVisibility="None"
                           HeadersVisibility="Column"
                           CanUserResizeColumns="False"
                           Margin="0,0,0,20">
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Category" 
-                                          Binding="{Binding Name}" 
-                                          Width="*"/>
-                        <DataGridTextColumn Header="Amount" 
-                                          Binding="{Binding Amount, StringFormat={}{0:C}}" 
-                                          Width="120"/>
-                        <DataGridTextColumn Header="% of total" 
-                                          Binding="{Binding Percentage, StringFormat={}{0:F1}%}" 
-                                          Width="100"/>
+
+                        <DataGridTextColumn Header="Category"
+                                            Binding="{Binding Name}"
+                                            Width="*"/>
+
+                        <DataGridTextColumn Header="Amount"
+                                            Binding="{Binding Amount, StringFormat={}{0:C}}"
+                                            Width="120"/>
+
+                        <DataGridTextColumn Header="%"
+                                            Binding="{Binding Percentage, StringFormat={}{0:F1}%}"
+                                            Width="60"/>
+
                     </DataGrid.Columns>
-                    <DataGrid.RowStyle>
-                        <Style TargetType="DataGridRow">
-                            <Setter Property="Background" Value="White"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Amount}" Value="0">
-                                    <Setter Property="Foreground" Value="#6B7280"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.RowStyle>
+
                 </DataGrid>
 
-                <TextBlock Text="{Binding CurrentPeriodText}" 
-                           FontSize="14" 
-                           Foreground="#6B7280" 
-                           HorizontalAlignment="Center"/>
+                <!-- Період -->
+                <TextBlock Text="{Binding CurrentPeriodText, StringFormat=Period: {0}}"
+                    FontSize="14"
+                    Foreground="#6B7280"
+                    HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>

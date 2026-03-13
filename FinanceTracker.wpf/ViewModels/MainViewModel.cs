@@ -72,6 +72,7 @@ namespace FinanceTracker.wpf.ViewModels
             {
                 _selectedPeriod = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CurrentPeriodText));
                 _ = LoadAsync();
             }
         }
@@ -218,8 +219,11 @@ namespace FinanceTracker.wpf.ViewModels
                 CategorySummaries.Add(c);
             }
 
+            TopExpenseCategories.Clear();
+
             TotalIncome = items.Where(t => t.IsIncome).Sum(t => t.Amount);
             TotalExpenses = items.Where(t => !t.IsIncome).Sum(t => t.Amount);
+
             TopExpenseCategories.Clear();
             var expenses = catSummaries.Where(c => !c.IsIncome && c.TotalAmount < 0).ToList();
             var totalExpenses = expenses.Sum(c => Math.Abs(c.TotalAmount));
@@ -233,6 +237,9 @@ namespace FinanceTracker.wpf.ViewModels
                     Percentage = totalExpenses > 0 ? (double)(Math.Abs(cat.TotalAmount) / totalExpenses * 100) : 0
                 });
             }
+
+            OnPropertyChanged(nameof(TopExpenseCategoryName));
+            OnPropertyChanged(nameof(TopExpenseCategoryAmount));
         }
 
         public async Task AddAsync()
@@ -300,7 +307,9 @@ namespace FinanceTracker.wpf.ViewModels
         }
 
         public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
+        public string TopExpenseCategoryName => TopExpenseCategories.Any() ? TopExpenseCategories.First().Name : "No data";
 
+        public decimal TopExpenseCategoryAmount => TopExpenseCategories.Any() ? TopExpenseCategories.First().Amount : 0;
         public class TopExpenseCategory
         {
             public string Name { get; set; } = string.Empty;
