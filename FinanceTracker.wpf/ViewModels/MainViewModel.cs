@@ -10,6 +10,8 @@ using FinanceTracker.wpf.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using LiveCharts;
+using LiveCharts.Wpf;
 using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
@@ -142,6 +144,8 @@ namespace FinanceTracker.wpf.ViewModels
 
         public bool IsExpenseSelected => TransactionType == TransactionType.Expense;
 
+        public SeriesCollection ExpenseSeries { get; set; } = new();
+
         public ICommand SetPeriodTodayCommand { get; private set; }
         public ICommand SetPeriodWeekCommand { get; private set; }
         public ICommand SetPeriodMonthCommand { get; private set; }
@@ -240,8 +244,21 @@ namespace FinanceTracker.wpf.ViewModels
                 });
             }
 
+            ExpenseSeries = new SeriesCollection();
+            foreach (var category in TopExpenseCategories) {
+                ExpenseSeries.Add(new PieSeries
+                {
+                    Title = category.Name,
+                    Values = new ChartValues<double> {
+                    (double)category.Amount
+                    },
+                    DataLabels = true
+                });
+            }
+
             OnPropertyChanged(nameof(TopExpenseCategoryName));
             OnPropertyChanged(nameof(TopExpenseCategoryAmount));
+            OnPropertyChanged(nameof(ExpenseSeries));
         }
 
         public async Task AddAsync()
