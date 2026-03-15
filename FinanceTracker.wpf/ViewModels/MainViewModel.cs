@@ -204,6 +204,8 @@ namespace FinanceTracker.wpf.ViewModels
             foreach (var t in items)
                 Transactions.Add(t);
 
+            OnPropertyChanged(nameof(TransactionCount));
+
             AccountBalances.Clear();
             var balances = await _financeService.GetAccountBalancesAsync();
             foreach (var b in balances)
@@ -328,6 +330,8 @@ namespace FinanceTracker.wpf.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public int TransactionCount => Transactions.Count;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)

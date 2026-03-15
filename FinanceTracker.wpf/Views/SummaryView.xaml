@@ -23,7 +23,7 @@
                 <Border Background="#FEF3C7"
                         CornerRadius="10"
                         Padding="12"
-                        Margin="0,0,0,20">
+                        Margin="0,0,0,10">
 
                     <StackPanel Orientation="Horizontal">
 
@@ -42,6 +42,13 @@
                     </StackPanel>
 
                 </Border>
+
+                <!-- Кількість транзакцій -->
+                <TextBlock Text="{Binding TransactionCount, StringFormat=Transactions: {0}}"
+                           FontSize="14"
+                           Foreground="#6B7280"
+                           Margin="0,0,0,15"
+                           HorizontalAlignment="Center"/>
 
                 <!-- Топ витрати -->
                 <TextBlock Text="Top Expenses"
@@ -76,9 +83,10 @@
 
                 <!-- Період -->
                 <TextBlock Text="{Binding CurrentPeriodText, StringFormat=Period: {0}}"
-                    FontSize="14"
-                    Foreground="#6B7280"
-                    HorizontalAlignment="Center"/>
+                           FontSize="14"
+                           Foreground="#6B7280"
+                           HorizontalAlignment="Center"/>
+
             </StackPanel>
         </Border>
     </Grid>
