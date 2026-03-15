@@ -10,6 +10,8 @@ using FinanceTracker.wpf.Models;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using LiveCharts;
+using LiveCharts.Wpf;
 using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
@@ -72,6 +74,7 @@ namespace FinanceTracker.wpf.ViewModels
             {
                 _selectedPeriod = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CurrentPeriodText));
                 _ = LoadAsync();
             }
         }
@@ -141,6 +144,8 @@ namespace FinanceTracker.wpf.ViewModels
 
         public bool IsExpenseSelected => TransactionType == TransactionType.Expense;
 
+        public SeriesCollection ExpenseSeries { get; set; } = new();
+
         public ICommand SetPeriodTodayCommand { get; private set; }
         public ICommand SetPeriodWeekCommand { get; private set; }
         public ICommand SetPeriodMonthCommand { get; private set; }
@@ -203,6 +208,8 @@ namespace FinanceTracker.wpf.ViewModels
             foreach (var t in items)
                 Transactions.Add(t);
 
+            OnPropertyChanged(nameof(TransactionCount));
+
             AccountBalances.Clear();
             var balances = await _financeService.GetAccountBalancesAsync();
             foreach (var b in balances)
@@ -218,8 +225,11 @@ namespace FinanceTracker.wpf.ViewModels
                 CategorySummaries.Add(c);
             }
 
+            TopExpenseCategories.Clear();
+
             TotalIncome = items.Where(t => t.IsIncome).Sum(t => t.Amount);
             TotalExpenses = items.Where(t => !t.IsIncome).Sum(t => t.Amount);
+
             TopExpenseCategories.Clear();
             var expenses = catSummaries.Where(c => !c.IsIncome && c.TotalAmount < 0).ToList();
             var totalExpenses = expenses.Sum(c => Math.Abs(c.TotalAmount));
@@ -233,6 +243,22 @@ namespace FinanceTracker.wpf.ViewModels
                     Percentage = totalExpenses > 0 ? (double)(Math.Abs(cat.TotalAmount) / totalExpenses * 100) : 0
                 });
             }
+
+            ExpenseSeries = new SeriesCollection();
+            foreach (var category in TopExpenseCategories) {
+                ExpenseSeries.Add(new PieSeries
+                {
+                    Title = category.Name,
+                    Values = new ChartValues<double> {
+                    (double)category.Amount
+                    },
+                    DataLabels = true
+                });
+            }
+
+            OnPropertyChanged(nameof(TopExpenseCategoryName));
+            OnPropertyChanged(nameof(TopExpenseCategoryAmount));
+            OnPropertyChanged(nameof(ExpenseSeries));
         }
 
         public async Task AddAsync()
@@ -300,7 +326,9 @@ namespace FinanceTracker.wpf.ViewModels
         }
 
         public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
+        public string TopExpenseCategoryName => TopExpenseCategories.Any() ? TopExpenseCategories.First().Name : "No data";
 
+        public decimal TopExpenseCategoryAmount => TopExpenseCategories.Any() ? TopExpenseCategories.First().Amount : 0;
         public class TopExpenseCategory
         {
             public string Name { get; set; } = string.Empty;
@@ -319,6 +347,8 @@ namespace FinanceTracker.wpf.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public int TransactionCount => Transactions.Count;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
