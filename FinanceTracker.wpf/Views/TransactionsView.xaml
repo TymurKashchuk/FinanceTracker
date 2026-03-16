@@ -14,15 +14,18 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- DataGrid з транзакціями -->
         <Border Background="White" 
                 CornerRadius="8" 
                 Padding="10" 
                 Grid.Row="0" 
                 Margin="0,0,10,0">
-            <DataGrid ItemsSource="{Binding Transactions}"
+            <DataGrid x:Name="TransactionsDataGrid"
+                      ItemsSource="{Binding Transactions}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
-                      IsReadOnly="True">
+                      IsReadOnly="True"
+                      SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
                     <DataGridTextColumn Header="Amount" Binding="{Binding Amount}" Width="100"/>
@@ -31,6 +34,13 @@
                     <DataGridTextColumn Header="Category" Binding="{Binding Category.Name}" Width="120"/>
                     <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="150"/>
                 </DataGrid.Columns>
+
+                <!-- Контекстне меню -->
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Delete" Click="DeleteTransaction_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
             </DataGrid>
         </Border>
 
