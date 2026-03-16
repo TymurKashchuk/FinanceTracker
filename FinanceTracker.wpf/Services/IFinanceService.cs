@@ -16,5 +16,6 @@ namespace FinanceTracker.wpf.Services
         Task<List<AccountBalanceDto>> GetAccountBalancesAsync();
         Task<List<CategorySummaryDto>> GetCategorySummariesAsync(DateTime? from = null, DateTime? to = null);
         Task ExportTransactionsToCsvAsync(string filePath, DateTime? from = null, DateTime? to = null);
+
     }
 }
