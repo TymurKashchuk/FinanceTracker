@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FinanceTracker.wpf.Data;
@@ -184,6 +185,31 @@ namespace FinanceTracker.wpf.Services
                 .ToList();
 
             return summaries;
+        }
+
+        public async Task ExportTransactionsToCsvAsync(string filePath, DateTime? from = null, DateTime? to = null) {
+            using var db = new AppDbContext();
+            var transactions = await db.Transactions
+                .Include(t => t.Account)
+                .Include(t => t.Category)
+                .ToListAsync();
+
+            if (from.HasValue) transactions = transactions.Where(t=>t.Date >= from.Value).ToList();
+            if(to.HasValue) transactions = transactions.Where(t => t.Date <= to.Value).ToList();
+
+            var csv = new List<string> { "Date,Description,Amount,Type,Account,Category" };
+
+            foreach (var t in transactions.OrderBy(t => t.Date))
+            {
+                var type = t.IsIncome ? "Income" : "Expense";
+                var amount = t.IsIncome ? $"+{t.Amount:F2}" : $"-{Math.Abs(t.Amount):F2}";
+                var account = t.Account?.Name ?? "Unknown";
+                var category = t.Category?.Name ?? "No category";
+
+                csv.Add($"{t.Date:yyyy-MM-dd HH:mm},\"{t.Description}\",{amount},\"{type}\",\"{account}\",\"{category}\"");
+            }
+
+            await File.WriteAllLinesAsync(filePath, csv, System.Text.Encoding.UTF8);
         }
     }
 }
