@@ -13,12 +13,23 @@
 
             <StackPanel>
 
-                <!-- Заголовок -->
-                <TextBlock Text="Category Summary"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,20"/>
+                <!-- Заголовок + кнопка Export -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,20">
+                    <TextBlock Text="Category Summary"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+
+                    <Button Content="Export CSV" 
+                            Width="120" 
+                            Height="35"
+                            Background="#059669"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            Command="{Binding ExportCsvCommand}"
+                            HorizontalAlignment="Right"
+                            Margin="10,0,0,0"/>
+                </StackPanel>
 
                 <!-- Найбільша категорія витрат -->
                 <Border Background="#FEF3C7"
@@ -94,9 +105,9 @@
                            Margin="0,0,0,10"/>
 
                 <lvc:PieChart Series="{Binding ExpenseSeries}"
-                           Height="250"
-                           LegendLocation="Right"
-                           Margin="0,0,0,20"/>
+                              Height="250"
+                              LegendLocation="Right"
+                              Margin="0,0,0,20"/>
 
             </StackPanel>
         </Border>

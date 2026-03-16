@@ -13,6 +13,8 @@ using System.Windows.Input;
 using LiveCharts;
 using LiveCharts.Wpf;
 using static FinanceTracker.wpf.Services.FinanceService;
+using System.Windows;
+using Microsoft.Win32;
 
 namespace FinanceTracker.wpf.ViewModels
 {
@@ -21,8 +23,7 @@ namespace FinanceTracker.wpf.ViewModels
         Today,
         ThisWeek,
         ThisMonth,
-        Last30Days,
-        Custom
+        Last30Days
     }
 
     public enum TransactionType
@@ -62,8 +63,7 @@ namespace FinanceTracker.wpf.ViewModels
             PeriodType.Today,
             PeriodType.ThisWeek,
             PeriodType.ThisMonth,
-            PeriodType.Last30Days,
-            PeriodType.Custom
+            PeriodType.Last30Days
         };
 
         private PeriodType _selectedPeriod = PeriodType.ThisMonth;
@@ -151,6 +151,7 @@ namespace FinanceTracker.wpf.ViewModels
         public ICommand SetPeriodMonthCommand { get; private set; }
         public ICommand LoadCommand { get; }
         public ICommand AddCommand { get; }
+        public ICommand ExportCsvCommand { get; }
 
         public MainViewModel()
         {
@@ -164,6 +165,8 @@ namespace FinanceTracker.wpf.ViewModels
             SetPeriodMonthCommand = new RelayCommand(obj => SelectedPeriod = PeriodType.ThisMonth);
 
             _ = InitializeAsync();
+
+            ExportCsvCommand = new RelayCommand(async _ => await ExportCsvAsync());
         }
 
         private async Task InitializeAsync()
@@ -297,6 +300,34 @@ namespace FinanceTracker.wpf.ViewModels
                 Debug.WriteLine($"Exception in AddAsync: {ex.Message}");
                 throw;
             }
+        }
+
+        private async Task ExportCsvAsync()
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv",
+                FileName = $"transactions_{DateTime.Now:yyyy-MM-dd}.csv"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                var (from, to) = GetPeriodDates();
+                await _financeService.ExportTransactionsToCsvAsync(dialog.FileName, from, to);
+                MessageBox.Show("Transactions exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private (DateTime? from, DateTime? to) GetPeriodDates()
+        {
+            return SelectedPeriod switch
+            {
+                PeriodType.Today => (DateTime.Now.Date, DateTime.Now.Date.AddDays(1).AddTicks(-1)),
+                PeriodType.ThisWeek => (StartOfWeek(DateTime.Now), EndOfWeek(DateTime.Now)),
+                PeriodType.ThisMonth => (StartOfMonth(DateTime.Now), EndOfMonth(DateTime.Now)),
+                PeriodType.Last30Days => (DateTime.Now.AddDays(-30), DateTime.Now),
+                _ => (null, null)
+            };
         }
 
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
