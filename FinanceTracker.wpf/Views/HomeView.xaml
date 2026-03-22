@@ -11,13 +11,6 @@
              Background="Transparent">
 
     <UserControl.Resources>
-        <!-- Тінь навколо блоку -->
-        <DropShadowEffect x:Key="DropShadowEffect"
-                          ShadowDepth="2"
-                          BlurRadius="8"
-                          Opacity="0.2" />
-
-        <!-- Конвертер кольору для балансу -->
         <conv:BalanceToBrushConverter x:Key="BalanceToBrushConverter"/>
     </UserControl.Resources>
 
