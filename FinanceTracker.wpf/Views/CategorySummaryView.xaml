@@ -4,7 +4,7 @@
              xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters">
 
     <UserControl.Resources>
-        <conv:BalanceToBrushConverter x:Key="BalanceToBrushConverter" />
+        <conv:BalanceToBrushConverter x:Key="BalanceToBrushConverter"/>
     </UserControl.Resources>
 
     <Border Background="White"

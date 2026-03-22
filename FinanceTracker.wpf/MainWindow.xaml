@@ -8,76 +8,26 @@
         xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
         mc:Ignorable="d"
         Title="Finance Tracker"
-        Height="600"
-        Width="1150"
-        Background="#F5F6FA">
+        Height="660"
+        Width="1200"
+        Background="#F3F4F6"
+        WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
     <Window.Resources>
-        
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-    <!-- Стиль кнопок -->
-        <Style TargetType="Button">
-            <Setter Property="Background" Value="#4F46E5"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="Margin" Value="5,0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <!-- Кнопки пресетів дат -->
-        <Style x:Key="PeriodButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#E5E7EB"/>
-            <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-        </Style>
-
-        <!-- Загальний розмір шрифту -->
-        <Style TargetType="Control">
-            <Setter Property="FontSize" Value="14"/>
-        </Style>
-
-        <Style TargetType="TextBox">
-            <Setter Property="Padding" Value="6"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-        </Style>
-
-        <Style TargetType="ComboBox">
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-        </Style>
-
-        <Style TargetType="DataGrid">
-            <Setter Property="Margin" Value="0,10,0,0"/>
-            <Setter Property="RowBackground" Value="White"/>
-            <Setter Property="AlternatingRowBackground" Value="#F3F4F6"/>
-            <Setter Property="GridLinesVisibility" Value="None"/>
-            <Setter Property="HeadersVisibility" Value="Column"/>
-        </Style>
-
-        <!-- Стиль вкладок -->
-        <Style TargetType="TabItem">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
     </Window.Resources>
 
-    <DockPanel Margin="20">
+    <DockPanel Margin="16">
 
         <!-- Верхня панель-->
         <Border Background="White"
                 CornerRadius="8"
                 Padding="15"
                 DockPanel.Dock="Top">
-
             <StackPanel>
 
                 <WrapPanel Margin="0,0,0,10">
@@ -102,32 +52,30 @@
                               ItemsSource="{Binding Categories}"
                               DisplayMemberPath="Name"
                               SelectedItem="{Binding SelectedCategory}"
-                              Visibility="{Binding IsExpenseSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-
+                              Visibility="{Binding IsExpenseSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                     <!-- ПЕРІОДИ -->
                     <ComboBox Width="110"
                               ItemsSource="{Binding PeriodTypes}"
                               SelectedItem="{Binding SelectedPeriod}"/>
 
-                    <Button Content="Today" 
-                            Width="65" 
+                    <Button Content="Today"
+                            Width="65"
                             Style="{StaticResource PeriodButtonStyle}"
                             Command="{Binding SetPeriodTodayCommand}"/>
-                    <Button Content="Week" 
-                            Width="65" 
+                    <Button Content="Week"
+                            Width="65"
                             Style="{StaticResource PeriodButtonStyle}"
                             Command="{Binding SetPeriodWeekCommand}"/>
-                    <Button Content="Month" 
-                            Width="65" 
+                    <Button Content="Month"
+                            Width="65"
                             Style="{StaticResource PeriodButtonStyle}"
                             Command="{Binding SetPeriodMonthCommand}"/>
 
                     <!-- ЛЕЙБЛ ПОТОЧНОГО ПЕРІОДУ -->
-                    <TextBlock Text="{Binding CurrentPeriodText}" 
-                               Foreground="#6B7280" 
-                               VerticalAlignment="Center" 
+                    <TextBlock Text="{Binding CurrentPeriodText}"
+                               Foreground="#6B7280"
+                               VerticalAlignment="Center"
                                Margin="5,0"
                                FontSize="12"/>
 
@@ -140,12 +88,7 @@
                     <Button Content="Add"
                             Width="100"
                             Command="{Binding AddCommand}"/>
-
-                    <Button Content="Load"
-                            Width="100"
-                            Background="#10B981"
-                            Command="{Binding LoadCommand}"/>
-
+                    
                 </StackPanel>
 
             </StackPanel>
@@ -157,16 +100,17 @@
                     Background="Transparent"
                     BorderBrush="Transparent">
             <TabItem Header="Home">
-                <views:HomeView />
+                <views:HomeView/>
             </TabItem>
-            
+
             <TabItem Header="Transactions">
-                <views:TransactionsView />
+                <views:TransactionsView/>
             </TabItem>
 
             <TabItem Header="Summary">
                 <views:SummaryView DataContext="{Binding}"/>
             </TabItem>
         </TabControl>
+
     </DockPanel>
 </Window>

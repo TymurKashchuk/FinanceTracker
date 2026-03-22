@@ -14,11 +14,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- DataGrid з транзакціями -->
-        <Border Background="White" 
-                CornerRadius="8" 
-                Padding="10" 
-                Grid.Row="0" 
+        <Border Background="White"
+                CornerRadius="8"
+                Padding="10"
+                Grid.Row="0"
                 Margin="0,0,10,0">
             <DataGrid x:Name="TransactionsDataGrid"
                       ItemsSource="{Binding Transactions}"
@@ -44,7 +43,6 @@
             </DataGrid>
         </Border>
 
-        <!-- Підсумкові в’юхи -->
         <Grid Grid.Row="1" Margin="0,10,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>

@@ -118,7 +118,6 @@ namespace FinanceTracker.wpf.ViewModels
         public ObservableCollection<CategorySummaryDto> CategorySummaries { get; } = new();
         public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
 
-        public ICommand LoadCommand { get; }
         public ICommand AddCommand { get; }
         public ICommand ExportCsvCommand { get; }
         public ICommand DeleteTransactionCommand { get; }
@@ -130,7 +129,6 @@ namespace FinanceTracker.wpf.ViewModels
         {
             _financeService = new FinanceService();
 
-            LoadCommand = new RelayCommand(async _ => await LoadAsync());
             AddCommand = new RelayCommand(async _ => await AddAsync());
             ExportCsvCommand = new RelayCommand(async _ => await ExportCsvAsync());
             DeleteTransactionCommand = new RelayCommand(async obj => await DeleteTransactionAsync(obj));
