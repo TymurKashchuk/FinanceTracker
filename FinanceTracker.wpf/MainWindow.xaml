@@ -1,4 +1,4 @@
-﻿<Window x:Class="FinanceTracker.wpf.MainWindow"
+<Window x:Class="FinanceTracker.wpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -32,27 +32,36 @@
 
                 <WrapPanel Margin="0,0,0,10">
 
-                    <TextBox Width="200"
+                    <TextBox Width="180"
+                             ToolTip="Опис"
                              Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <TextBox Width="100"
+                    <TextBox Width="90"
+                             ToolTip="Сума"
                              Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <ComboBox Width="140"
+                    <DatePicker Width="120"
+                                SelectedDate="{Binding SelectedDate}"
+                                Margin="0,0,8,0"
+                                ToolTip="Дата транзакції"/>
+
+                    <ComboBox Width="130"
                               ItemsSource="{Binding Accounts}"
                               DisplayMemberPath="Name"
-                              SelectedItem="{Binding SelectedAccount}"/>
+                              SelectedItem="{Binding SelectedAccount}"
+                              ToolTip="Рахунок"/>
 
-                    <ComboBox Width="140"
+                    <ComboBox Width="110"
                               ItemsSource="{Binding TransactionTypes}"
                               SelectedItem="{Binding TransactionType}"
-                              Margin="0,0,10,0"/>
+                              Margin="0,0,8,0"
+                              ToolTip="Тип транзакції"/>
 
                     <ComboBox Width="140"
-                              ItemsSource="{Binding Categories}"
+                              ItemsSource="{Binding FilteredCategories}"
                               DisplayMemberPath="Name"
                               SelectedItem="{Binding SelectedCategory}"
-                              Visibility="{Binding IsExpenseSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                              ToolTip="Категорія"/>
 
                     <!-- ПЕРІОДИ -->
                     <ComboBox Width="110"

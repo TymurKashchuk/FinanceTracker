@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="FinanceTracker.wpf.Views.HomeView"
+<UserControl x:Class="FinanceTracker.wpf.Views.HomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -112,39 +112,39 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Net -->
+                    <!-- Net (Cash Flow) -->
                     <Border Grid.Column="0"
                             Background="#F9FAFB"
                             CornerRadius="8"
                             Padding="10"
                             Margin="0,0,8,0">
                         <StackPanel>
-                            <TextBlock Text="Net"
+                            <TextBlock Text="Net (Чистий потік)"
                                        FontWeight="Medium"
                                        FontSize="13"
                                        Foreground="#374151"/>
 
-                            <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:C}'}"
+                            <TextBlock Text="{Binding NetSavings, StringFormat='{}{0:C}'}"
                                        FontSize="16"
                                        FontWeight="Bold"
-                                       Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
+                                       Foreground="{Binding NetSavings, Converter={StaticResource BalanceToBrushConverter}}"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Savings -->
+                    <!-- Savings Rate -->
                     <Border Grid.Column="1"
                             Background="#F9FAFB"
                             CornerRadius="8"
                             Padding="10"
                             Margin="8,0,0,0">
                         <StackPanel>
-                            <TextBlock Text="Savings"
+                            <TextBlock Text="Рівень заощаджень"
                                        FontWeight="Medium"
                                        FontSize="13"
                                        Foreground="#374151"/>
 
-                            <TextBlock Text="{Binding TotalIncome, StringFormat='{}{0:C}'}"
-                                       ToolTip="Поки відображає дохід. Converter буде додано далі."
+                            <TextBlock Text="{Binding SavingsRate, StringFormat='{}{0:F1}%'}"
+                                       ToolTip="Відсоток збережених коштів від доходу за обраний період"
                                        FontSize="16"
                                        FontWeight="Bold"
                                        Foreground="#3B82F6"/>

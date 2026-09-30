@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -47,8 +47,16 @@ namespace FinanceTracker.wpf.ViewModels
         public ObservableCollection<Transaction> Transactions { get; } = new();
         public ObservableCollection<Account> Accounts { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
-        public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Income, TransactionType.Expense };
+        public ObservableCollection<Category> FilteredCategories { get; } = new();
+        public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Expense, TransactionType.Income };
         public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.Last30Days };
+
+        private DateTime _selectedDate = DateTime.Today;
+        public DateTime SelectedDate
+        {
+            get => _selectedDate;
+            set { _selectedDate = value; OnPropertyChanged(); }
+        }
 
         private PeriodType _selectedPeriod = PeriodType.ThisMonth;
         public PeriodType SelectedPeriod
@@ -98,7 +106,7 @@ namespace FinanceTracker.wpf.ViewModels
             set { _amount = value; OnPropertyChanged(); }
         }
 
-        private TransactionType _transactionType = TransactionType.Income;
+        private TransactionType _transactionType = TransactionType.Expense;
         public TransactionType TransactionType
         {
             get => _transactionType;
@@ -107,7 +115,7 @@ namespace FinanceTracker.wpf.ViewModels
                 _transactionType = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsExpenseSelected));
-                if (value == TransactionType.Income) SelectedCategory = null;
+                UpdateFilteredCategories();
             }
         }
 
@@ -156,7 +164,7 @@ namespace FinanceTracker.wpf.ViewModels
             Categories.Clear();
             var categories = await _financeService.GetCategoriesAsync();
             foreach (var c in categories) Categories.Add(c);
-            SelectedCategory ??= Categories.FirstOrDefault();
+            UpdateFilteredCategories();
 
             var (from, to) = GetPeriodDates();
             Transactions.Clear();
@@ -174,6 +182,8 @@ namespace FinanceTracker.wpf.ViewModels
 
             TotalIncome = items.Where(t => t.IsIncome).Sum(t => t.Amount);
             TotalExpenses = items.Where(t => !t.IsIncome).Sum(t => t.Amount);
+            NetSavings = TotalIncome - TotalExpenses;
+            SavingsRate = TotalIncome > 0 ? (double)(NetSavings / TotalIncome * 100) : 0;
 
             TopExpenseCategories.Clear();
             var expenses = catSummaries.Where(c => !c.IsIncome && c.TotalAmount < 0).ToList();
@@ -216,21 +226,39 @@ namespace FinanceTracker.wpf.ViewModels
             OnPropertyChanged(nameof(ExpenseSeries));
         }
 
+        private void UpdateFilteredCategories()
+        {
+            var previousSelectedId = SelectedCategory?.Id;
+            FilteredCategories.Clear();
+            bool isIncome = TransactionType == TransactionType.Income;
+            var matched = Categories.Where(c => c.IsIncome == isIncome).ToList();
+            foreach (var c in matched)
+            {
+                FilteredCategories.Add(c);
+            }
+            SelectedCategory = FilteredCategories.FirstOrDefault(c => c.Id == previousSelectedId) 
+                               ?? FilteredCategories.FirstOrDefault();
+        }
+
         public async Task AddAsync()
         {
-            if (string.IsNullOrWhiteSpace(Description) || Amount <= 0 || SelectedAccount == null) return;
-            if (TransactionType == TransactionType.Expense && SelectedCategory == null) return;
+            if (string.IsNullOrWhiteSpace(Description) || Amount <= 0 || SelectedAccount == null)
+            {
+                MessageBox.Show("Будь ласка, введіть опис, коректну суму (більше 0) та оберіть рахунок.",
+                    "Увага", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             try
             {
                 var transaction = new Transaction
                 {
-                    Description = Description,
+                    Description = Description.Trim(),
                     Amount = Amount,
-                    Date = DateTime.Now,
+                    Date = SelectedDate.Date + DateTime.Now.TimeOfDay,
                     IsIncome = TransactionType == TransactionType.Income,
                     AccountId = SelectedAccount.Id,
-                    CategoryId = TransactionType == TransactionType.Expense ? SelectedCategory?.Id : null
+                    CategoryId = SelectedCategory?.Id
                 };
                 await _financeService.AddTransactionAsync(transaction);
 
@@ -244,7 +272,7 @@ namespace FinanceTracker.wpf.ViewModels
             }
         }
 
-        public async Task DeleteTransactionAsync(object obj)
+        public async Task DeleteTransactionAsync(object? obj)
         {
             if (obj is not Transaction transaction) return;
 
@@ -276,9 +304,10 @@ namespace FinanceTracker.wpf.ViewModels
         {
             Description = string.Empty;
             Amount = 0;
-            TransactionType = TransactionType.Income;
+            SelectedDate = DateTime.Today;
+            TransactionType = TransactionType.Expense;
             SelectedAccount = Accounts.FirstOrDefault();
-            SelectedCategory = null;
+            UpdateFilteredCategories();
         }
 
         private (DateTime? from, DateTime? to) GetPeriodDates()
@@ -312,6 +341,20 @@ namespace FinanceTracker.wpf.ViewModels
         {
             get => _totalExpenses;
             set { _totalExpenses = value; OnPropertyChanged(); }
+        }
+
+        private decimal _netSavings;
+        public decimal NetSavings
+        {
+            get => _netSavings;
+            set { _netSavings = value; OnPropertyChanged(); }
+        }
+
+        private double _savingsRate;
+        public double SavingsRate
+        {
+            get => _savingsRate;
+            set { _savingsRate = value; OnPropertyChanged(); }
         }
 
         private string _topExpenseCategoryName = "No expenses";
