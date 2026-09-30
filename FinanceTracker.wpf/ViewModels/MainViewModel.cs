@@ -45,11 +45,15 @@ namespace FinanceTracker.wpf.ViewModels
         private readonly IFinanceService _financeService;
 
         public ObservableCollection<Transaction> Transactions { get; } = new();
+        public ObservableCollection<Transaction> RecentTransactions { get; } = new();
         public ObservableCollection<Account> Accounts { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
         public ObservableCollection<Category> FilteredCategories { get; } = new();
         public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Expense, TransactionType.Income };
         public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.Last30Days };
+
+        public bool HasRecentTransactions => RecentTransactions.Count > 0;
+        public bool HasExpenses => TopExpenseCategories.Count > 0;
 
         private DateTime _selectedDate = DateTime.Today;
         public DateTime SelectedDate
@@ -224,6 +228,14 @@ namespace FinanceTracker.wpf.ViewModels
                 });
             }
             OnPropertyChanged(nameof(ExpenseSeries));
+
+            RecentTransactions.Clear();
+            foreach (var t in items.Take(5))
+            {
+                RecentTransactions.Add(t);
+            }
+            OnPropertyChanged(nameof(HasRecentTransactions));
+            OnPropertyChanged(nameof(HasExpenses));
         }
 
         private void UpdateFilteredCategories()

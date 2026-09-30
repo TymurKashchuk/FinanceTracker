@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +20,12 @@ namespace FinanceTracker.wpf.Models
         public DateTime Date { get; set; } = DateTime.Now;
         public string Description { get; set; } = string.Empty;
 
-        public bool IsIncome { get; set; }              
+        public bool IsIncome { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public string FormattedAmount => (IsIncome ? "+ " : "- ") + $"{Amount:N2} ₴";
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public string DisplayType => IsIncome ? "Дохід" : "Витрата";
     }
 }
