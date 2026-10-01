@@ -1,212 +1,31 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Input;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using FinanceTracker.wpf.Models;
 using FinanceTracker.wpf.Services;
 using LiveCharts;
 using LiveCharts.Wpf;
-using Microsoft.Win32;
-using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
 {
-    public enum PeriodType
+    public partial class MainViewModel : INotifyPropertyChanged
     {
-        Today,
-        ThisWeek,
-        ThisMonth,
-        AllTime,
-        Custom
-    }
-
-    public enum TransactionType
-    {
-        Income,
-        Expense
-    }
-
-    public enum NavigationTab
-    {
-        Dashboard,
-        Transactions,
-        Analytics
-    }
-
-    public class MainViewModel : INotifyPropertyChanged
-    {
-        private NavigationTab _currentTab = NavigationTab.Dashboard;
-        public NavigationTab CurrentTab
-        {
-            get => _currentTab;
-            set
-            {
-                _currentTab = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsDashboardTab));
-                OnPropertyChanged(nameof(IsTransactionsTab));
-                OnPropertyChanged(nameof(IsAnalyticsTab));
-                OnPropertyChanged(nameof(CurrentPageTitle));
-                OnPropertyChanged(nameof(CurrentPageSubtitle));
-            }
-        }
-
-        public bool IsDashboardTab => CurrentTab == NavigationTab.Dashboard;
-        public bool IsTransactionsTab => CurrentTab == NavigationTab.Transactions;
-        public bool IsAnalyticsTab => CurrentTab == NavigationTab.Analytics;
-
-        public string CurrentPageTitle => CurrentTab switch
-        {
-            NavigationTab.Dashboard => "Дашборд",
-            NavigationTab.Transactions => "Транзакції",
-            NavigationTab.Analytics => "Аналітика",
-            _ => "Фінанси"
-        };
-
-        public string CurrentPageSubtitle => CurrentTab switch
-        {
-            NavigationTab.Dashboard => "Огляд балансу, ключові показники та активність",
-            NavigationTab.Transactions => "Повна історія операцій з пошуком та фільтрами",
-            NavigationTab.Analytics => "Структура витрат, підсумки категорій та звіти",
-            _ => string.Empty
-        };
-
-        public string CurrentPeriodText => SelectedPeriod switch
-        {
-            PeriodType.Today => "Сьогодні",
-            PeriodType.ThisWeek => "Тиждень",
-            PeriodType.ThisMonth => "Місяць",
-            PeriodType.AllTime => "Весь час",
-            PeriodType.Custom => $"{CustomDateFrom:dd.MM} - {CustomDateTo:dd.MM}",
-            _ => "Весь час"
-        };
-
-        public bool IsTodayPeriod => SelectedPeriod == PeriodType.Today;
-        public bool IsWeekPeriod => SelectedPeriod == PeriodType.ThisWeek;
-        public bool IsMonthPeriod => SelectedPeriod == PeriodType.ThisMonth;
-        public bool IsAllTimePeriod => SelectedPeriod == PeriodType.AllTime;
-        public bool IsCustomPeriod => SelectedPeriod == PeriodType.Custom;
-
-        private DateTime _customDateFrom = DateTime.Today.AddDays(-7);
-        public DateTime CustomDateFrom
-        {
-            get => _customDateFrom;
-            set
-            {
-                if (_customDateFrom != value)
-                {
-                    _customDateFrom = value;
-                    if (_customDateFrom > _customDateTo)
-                    {
-                        _customDateTo = _customDateFrom;
-                        OnPropertyChanged(nameof(CustomDateTo));
-                    }
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(CurrentPeriodText));
-                    if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
-                }
-            }
-        }
-
-        private DateTime _customDateTo = DateTime.Today;
-        public DateTime CustomDateTo
-        {
-            get => _customDateTo;
-            set
-            {
-                if (_customDateTo != value)
-                {
-                    _customDateTo = value;
-                    if (_customDateTo < _customDateFrom)
-                    {
-                        _customDateFrom = _customDateTo;
-                        OnPropertyChanged(nameof(CustomDateFrom));
-                    }
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(CurrentPeriodText));
-                    if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
-                }
-            }
-        }
-
-        private bool _isQuickAddExpanded = true;
-        public bool IsQuickAddExpanded
-        {
-            get => _isQuickAddExpanded;
-            set
-            {
-                _isQuickAddExpanded = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(QuickAddToggleText));
-            }
-        }
-
-        public string QuickAddToggleText => IsQuickAddExpanded ? "Згорнути" : "+ Нова операція";
-
         private readonly IFinanceService _financeService;
 
         public ObservableCollection<Transaction> Transactions { get; } = new();
         public ObservableCollection<Transaction> FilteredTransactions { get; } = new();
-        public ObservableCollection<Transaction> RecentTransactions { get; } = new();
         public ObservableCollection<Account> Accounts { get; } = new();
-        public ObservableCollection<string> AccountFilterOptions { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
         public ObservableCollection<Category> FilteredCategories { get; } = new();
         public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Expense, TransactionType.Income };
         public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.AllTime, PeriodType.Custom };
 
-        public bool HasRecentTransactions => RecentTransactions.Count > 0;
-        public bool HasExpenses => TopExpenseCategories.Count > 0;
-
-        private string _searchText = string.Empty;
-        public string SearchText
-        {
-            get => _searchText;
-            set
-            {
-                _searchText = value;
-                OnPropertyChanged();
-                ApplyTransactionFilter();
-            }
-        }
-
-        private string _selectedAccountFilter = "Всі рахунки";
-        public string SelectedAccountFilter
-        {
-            get => _selectedAccountFilter;
-            set
-            {
-                _selectedAccountFilter = value;
-                OnPropertyChanged();
-                ApplyTransactionFilter();
-            }
-        }
-
-        public int FilteredTransactionsCount => FilteredTransactions.Count;
-
-        public ObservableCollection<string> TypeFilterOptions { get; } = new() { "Всі типи", "Тільки витрати", "Тільки доходи" };
-
-        private string _selectedTypeFilter = "Всі типи";
-        public string SelectedTypeFilter
-        {
-            get => _selectedTypeFilter;
-            set
-            {
-                _selectedTypeFilter = value;
-                OnPropertyChanged();
-                ApplyTransactionFilter();
-            }
-        }
-
-        private string _statusMessage = string.Empty;
-        public string StatusMessage
+        private string? _statusMessage;
+        public string? StatusMessage
         {
             get => _statusMessage;
             set
@@ -246,137 +65,21 @@ namespace FinanceTracker.wpf.ViewModels
             IsStatusError = isError;
         }
 
-        private DateTime? _selectedDate = DateTime.Today;
-        public DateTime? SelectedDate
+        public MainViewModel() : this(new FinanceService())
         {
-            get => _selectedDate;
-            set { _selectedDate = value ?? DateTime.Today; OnPropertyChanged(); }
         }
 
-        private PeriodType _selectedPeriod = PeriodType.ThisMonth;
-        public PeriodType SelectedPeriod
+        public MainViewModel(IFinanceService financeService)
         {
-            get => _selectedPeriod;
-            set
-            {
-                _selectedPeriod = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentPeriodText));
-                OnPropertyChanged(nameof(IsTodayPeriod));
-                OnPropertyChanged(nameof(IsWeekPeriod));
-                OnPropertyChanged(nameof(IsMonthPeriod));
-                OnPropertyChanged(nameof(IsAllTimePeriod));
-                OnPropertyChanged(nameof(IsCustomPeriod));
-                _ = LoadAsync();
-            }
-        }
+            _financeService = financeService ?? new FinanceService();
 
-        private Account? _selectedAccount;
-        public Account? SelectedAccount
-        {
-            get => _selectedAccount;
-            set { _selectedAccount = value; OnPropertyChanged(); }
-        }
+            InitializeNavigationCommands();
+            InitializePeriodCommands();
+            InitializeQuickAddCommands();
+            InitializeTransactionCommands();
 
-        private Category? _selectedCategory;
-        public Category? SelectedCategory
-        {
-            get => _selectedCategory;
-            set { _selectedCategory = value; OnPropertyChanged(); }
-        }
-
-        private Transaction? _selectedTransaction;
-        public Transaction? SelectedTransaction
-        {
-            get => _selectedTransaction;
-            set { _selectedTransaction = value; OnPropertyChanged(); }
-        }
-
-        private string _description = string.Empty;
-        public string Description
-        {
-            get => _description;
-            set { _description = value; OnPropertyChanged(); }
-        }
-
-        private decimal _amount;
-        public decimal Amount
-        {
-            get => _amount;
-            set { _amount = value; OnPropertyChanged(); }
-        }
-
-        private TransactionType _transactionType = TransactionType.Expense;
-        public TransactionType TransactionType
-        {
-            get => _transactionType;
-            set
-            {
-                _transactionType = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(IsExpenseSelected));
-                UpdateFilteredCategories();
-            }
-        }
-
-        public bool IsExpenseSelected => TransactionType == TransactionType.Expense;
-
-        public SeriesCollection ExpenseSeries { get; set; } = new();
-        public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
-        public ObservableCollection<CategorySummaryDto> CategorySummaries { get; } = new();
-        public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
-        public ObservableCollection<CategoryBudgetDto> MonthlyBudgets { get; } = new();
-        public bool HasMonthlyBudgets => MonthlyBudgets.Count > 0;
-
-        public ICommand AddCommand { get; }
-        public ICommand ExportCsvCommand { get; }
-        public ICommand DeleteTransactionCommand { get; }
-        public ICommand ClearFormCommand { get; }
-        public ICommand ClearSearchCommand { get; }
-        public ICommand SetDateTodayCommand { get; }
-        public ICommand SetDateYesterdayCommand { get; }
-        public ICommand SetPeriodTodayCommand { get; }
-        public ICommand SetPeriodWeekCommand { get; }
-        public ICommand SetPeriodMonthCommand { get; }
-        public ICommand SetPeriodAllTimeCommand { get; }
-        public ICommand SetPeriodCustomCommand { get; }
-        public ICommand SetPeriodLast30DaysCommand => SetPeriodAllTimeCommand;
-        public ICommand ToggleQuickAddCommand { get; }
-        public ICommand SetTabDashboardCommand { get; }
-        public ICommand SetTabTransactionsCommand { get; }
-        public ICommand SetTabAnalyticsCommand { get; }
-
-        public MainViewModel()
-        {
-            _financeService = new FinanceService();
-
-            AddCommand = new RelayCommand(async _ => await AddAsync());
-            ExportCsvCommand = new RelayCommand(async _ => await ExportCsvAsync());
-            DeleteTransactionCommand = new RelayCommand(async obj => await DeleteTransactionAsync(obj));
-            ClearFormCommand = new RelayCommand(_ => ResetForm());
-            ClearSearchCommand = new RelayCommand(_ => SearchText = string.Empty);
-            ToggleQuickAddCommand = new RelayCommand(_ => IsQuickAddExpanded = !IsQuickAddExpanded);
-
-            SetDateTodayCommand = new RelayCommand(_ => SelectedDate = DateTime.Today);
-            SetDateYesterdayCommand = new RelayCommand(_ => SelectedDate = DateTime.Today.AddDays(-1));
-
-            SetPeriodTodayCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.Today);
-            SetPeriodWeekCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisWeek);
-            SetPeriodMonthCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisMonth);
-            SetPeriodAllTimeCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.AllTime);
-            SetPeriodCustomCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.Custom);
-
-            SetTabDashboardCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Dashboard);
-            SetTabTransactionsCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Transactions);
-            SetTabAnalyticsCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Analytics);
-
-            _ = InitializeAsync();
-        }
-
-        private async Task InitializeAsync()
-        {
-            await _financeService.SeedAsync();
-            await LoadAsync();
+            ResetForm();
+            _ = LoadAsync();
         }
 
         public async Task LoadAsync()
@@ -384,15 +87,12 @@ namespace FinanceTracker.wpf.ViewModels
             Accounts.Clear();
             var accounts = await _financeService.GetAccountsAsync();
             foreach (var a in accounts) Accounts.Add(a);
-            SelectedAccount ??= Accounts.FirstOrDefault();
 
             AccountFilterOptions.Clear();
             AccountFilterOptions.Add("Всі рахунки");
-            foreach (var a in Accounts) AccountFilterOptions.Add(a.Name);
-            if (!AccountFilterOptions.Contains(SelectedAccountFilter))
-            {
-                SelectedAccountFilter = "Всі рахунки";
-            }
+            foreach (var a in accounts) AccountFilterOptions.Add(a.Name);
+
+            SelectedAccount = Accounts.FirstOrDefault();
 
             Categories.Clear();
             var categories = await _financeService.GetCategoriesAsync();
@@ -431,7 +131,7 @@ namespace FinanceTracker.wpf.ViewModels
             }
             else
             {
-                TopExpenseCategoryName = "No expenses";
+                TopExpenseCategoryName = "Немає витрат";
                 TopExpenseCategoryAmount = 0;
             }
 
@@ -476,282 +176,8 @@ namespace FinanceTracker.wpf.ViewModels
             OnPropertyChanged(nameof(HasMonthlyBudgets));
         }
 
-        private void UpdateFilteredCategories()
-        {
-            var previousSelectedId = SelectedCategory?.Id;
-            FilteredCategories.Clear();
-            bool isIncome = TransactionType == TransactionType.Income;
-            var matched = Categories.Where(c => c.IsIncome == isIncome).ToList();
-            foreach (var c in matched)
-            {
-                FilteredCategories.Add(c);
-            }
-            SelectedCategory = FilteredCategories.FirstOrDefault(c => c.Id == previousSelectedId) 
-                               ?? FilteredCategories.FirstOrDefault();
-        }
-
-        public void ApplyTransactionFilter()
-        {
-            FilteredTransactions.Clear();
-            var query = Transactions.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchText))
-            {
-                var term = SearchText.Trim().ToLower();
-                query = query.Where(t => (t.Description != null && t.Description.ToLower().Contains(term))
-                                      || (t.Category != null && t.Category.Name.ToLower().Contains(term)));
-            }
-
-            if (!string.IsNullOrEmpty(SelectedAccountFilter) && SelectedAccountFilter != "Всі рахунки")
-            {
-                query = query.Where(t => t.Account != null && t.Account.Name == SelectedAccountFilter);
-            }
-
-            if (!string.IsNullOrEmpty(SelectedTypeFilter) && SelectedTypeFilter != "Всі типи")
-            {
-                bool filterIncome = SelectedTypeFilter == "Тільки доходи";
-                query = query.Where(t => t.IsIncome == filterIncome);
-            }
-
-            foreach (var t in query)
-            {
-                FilteredTransactions.Add(t);
-            }
-
-            OnPropertyChanged(nameof(FilteredTransactionsCount));
-        }
-
-        public async Task AddAsync()
-        {
-            // 1. Валідація опису
-            if (string.IsNullOrWhiteSpace(Description))
-            {
-                SetStatusMessage("Будь ласка, вкажіть опис операції", isError: true);
-                return;
-            }
-
-            var trimmedDesc = Description.Trim();
-            if (trimmedDesc.Length < 2)
-            {
-                SetStatusMessage("Опис операції занадто короткий (мінімум 2 символи)", isError: true);
-                return;
-            }
-
-            if (trimmedDesc.Length > 100)
-            {
-                SetStatusMessage("Опис операції занадто довгий (максимум 100 символів)", isError: true);
-                return;
-            }
-
-            // 2. Валідація суми
-            if (Amount <= 0)
-            {
-                SetStatusMessage("Сума операції має бути більшою за 0 ₴", isError: true);
-                return;
-            }
-
-            if (Amount > 100_000_000)
-            {
-                SetStatusMessage("Сума операції не може перевищувати 100 000 000 ₴", isError: true);
-                return;
-            }
-
-            // 3. Валідація рахунку
-            if (SelectedAccount == null)
-            {
-                SetStatusMessage("Будь ласка, оберіть рахунок для операції", isError: true);
-                return;
-            }
-
-            // 4. Валідація категорії
-            if (SelectedCategory == null)
-            {
-                SetStatusMessage("Будь ласка, оберіть категорію витрати/доходу", isError: true);
-                return;
-            }
-
-            // 5. Валідація дати
-            var opDate = SelectedDate ?? DateTime.Today;
-            if (opDate.Date > DateTime.Today.AddYears(1))
-            {
-                SetStatusMessage("Дата операції не може бути пізнішою за 1 рік уперед", isError: true);
-                return;
-            }
-
-            if (opDate.Date < new DateTime(2000, 1, 1))
-            {
-                SetStatusMessage("Дата операції не може бути ранішою за 01.01.2000", isError: true);
-                return;
-            }
-
-            try
-            {
-                var transaction = new Transaction
-                {
-                    Description = trimmedDesc,
-                    Amount = Amount,
-                    Date = opDate.Date + DateTime.Now.TimeOfDay,
-                    IsIncome = TransactionType == TransactionType.Income,
-                    AccountId = SelectedAccount.Id,
-                    CategoryId = SelectedCategory.Id
-                };
-                await _financeService.AddTransactionAsync(transaction);
-
-                await LoadAsync();
-                var sign = transaction.IsIncome ? "+" : "-";
-                SetStatusMessage($"✓ Операцію «{transaction.Description}» ({sign}{transaction.Amount:N2} ₴) успішно додано", isError: false);
-                ResetForm();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                SetStatusMessage($"Помилка: {ex.Message}", isError: true);
-            }
-        }
-
-        public async Task DeleteTransactionAsync(object? obj)
-        {
-            var transaction = obj as Transaction ?? SelectedTransaction;
-            if (transaction == null) return;
-
-            var sign = transaction.IsIncome ? "+" : "-";
-            var result = MessageBox.Show(
-                $"Ви впевнені, що хочете видалити операцію?\n\n" +
-                $"• Опис: {transaction.Description}\n" +
-                $"• Сума: {sign}{transaction.Amount:N2} ₴\n" +
-                $"• Дата: {transaction.Date:dd.MM.yyyy HH:mm}\n" +
-                $"• Рахунок: {transaction.Account?.Name ?? "—"}",
-                "Підтвердження видалення",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes) return;
-
-            try
-            {
-                await _financeService.DeleteTransactionAsync(transaction.Id);
-                await LoadAsync();
-                SetStatusMessage($"Операцію «{transaction.Description}» успішно видалено", isError: false);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                SetStatusMessage($"Помилка при видаленні: {ex.Message}", isError: true);
-            }
-        }
-
-        private async Task ExportCsvAsync()
-        {
-            var dialog = new SaveFileDialog
-            {
-                Filter = "CSV files (*.csv)|*.csv",
-                FileName = $"transactions_{DateTime.Now:yyyy-MM-dd}.csv"
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                var (from, to) = GetPeriodDates();
-                await _financeService.ExportTransactionsToCsvAsync(dialog.FileName, from, to);
-                MessageBox.Show("Експорт завершено!");
-            }
-        }
-
-        private void ResetForm()
-        {
-            Description = string.Empty;
-            Amount = 0;
-            SelectedDate = DateTime.Today;
-            TransactionType = TransactionType.Expense;
-            SelectedAccount = Accounts.FirstOrDefault();
-            UpdateFilteredCategories();
-        }
-
-        private (DateTime? from, DateTime? to) GetPeriodDates()
-        {
-            return SelectedPeriod switch
-            {
-                PeriodType.Today => (DateTime.Now.Date, DateTime.Now.Date.AddDays(1).AddTicks(-1)),
-                PeriodType.ThisWeek => (StartOfWeek(DateTime.Now), EndOfWeek(DateTime.Now)),
-                PeriodType.ThisMonth => (StartOfMonth(DateTime.Now), EndOfMonth(DateTime.Now)),
-                PeriodType.AllTime => (null, null),
-                PeriodType.Custom => (CustomDateFrom.Date, CustomDateTo.Date.AddDays(1).AddTicks(-1)),
-                _ => (null, null)
-            };
-        }
-
-        private decimal _totalBalance;
-        public decimal TotalBalance
-        {
-            get => _totalBalance;
-            set { _totalBalance = value; OnPropertyChanged(); }
-        }
-
-        private decimal _totalIncome;
-        public decimal TotalIncome
-        {
-            get => _totalIncome;
-            set { _totalIncome = value; OnPropertyChanged(); }
-        }
-
-        private decimal _totalExpenses;
-        public decimal TotalExpenses
-        {
-            get => _totalExpenses;
-            set { _totalExpenses = value; OnPropertyChanged(); }
-        }
-
-        private decimal _netSavings;
-        public decimal NetSavings
-        {
-            get => _netSavings;
-            set { _netSavings = value; OnPropertyChanged(); }
-        }
-
-        private double _savingsRate;
-        public double SavingsRate
-        {
-            get => _savingsRate;
-            set { _savingsRate = value; OnPropertyChanged(); }
-        }
-
-        private string _topExpenseCategoryName = "No expenses";
-        public string TopExpenseCategoryName
-        {
-            get => _topExpenseCategoryName;
-            set { _topExpenseCategoryName = value; OnPropertyChanged(); }
-        }
-
-        private decimal _topExpenseCategoryAmount;
-        public decimal TopExpenseCategoryAmount
-        {
-            get => _topExpenseCategoryAmount;
-            set { _topExpenseCategoryAmount = value; OnPropertyChanged(); }
-        }
-
-        public int TransactionCount => Transactions.Count;
-
-        public class TopExpenseCategory
-        {
-            public string Name { get; set; } = "";
-            public decimal Amount { get; set; }
-            public double Percentage { get; set; }
-        }
-
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        public static DateTime StartOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday)
-        {
-            var diff = (int)(dt.DayOfWeek - firstDayOfWeek);
-            if (diff < 0) diff += 7;
-            return dt.AddDays(-diff).Date;
-        }
-
-        public static DateTime EndOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday)
-            => StartOfWeek(dt, firstDayOfWeek).AddDays(6).Date.AddDays(1).AddTicks(-1);
-
-        public static DateTime StartOfMonth(DateTime dt) => new DateTime(dt.Year, dt.Month, 1);
-        public static DateTime EndOfMonth(DateTime dt) => StartOfMonth(dt).AddMonths(1).AddTicks(-1);
     }
 }

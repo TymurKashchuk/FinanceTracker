@@ -1,0 +1,172 @@
+<UserControl x:Class="FinanceTracker.wpf.Views.TopBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
+             xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:MainViewModel}"
+             d:DesignHeight="50" d:DesignWidth="950">
+
+    <UserControl.Resources>
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <!-- Верхній рядок: Заголовок + вибір періоду -->
+    <DockPanel LastChildFill="False">
+        <!-- Ліворуч: Назва сторінки та опис -->
+        <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+            <TextBlock Text="{Binding CurrentPageTitle}"
+                       FontSize="22"
+                       FontWeight="Bold"
+                       Foreground="#0F172A"/>
+            <TextBlock Text="{Binding CurrentPageSubtitle}"
+                       FontSize="12"
+                       Foreground="#64748B"
+                       Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <!-- Праворуч: Селектор глобального періоду -->
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+            <Path Data="{StaticResource GeoCalendar}"
+                  Fill="#64748B"
+                  Width="14" Height="14"
+                  Stretch="Uniform"
+                  Margin="0,0,8,0"
+                  VerticalAlignment="Center"/>
+
+            <!-- Сьогодні -->
+            <Button Content="Сьогодні"
+                    MinWidth="82"
+                    Command="{Binding SetPeriodTodayCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsTodayPeriod}" Value="True">
+                                <Setter Property="Background" Value="#4F46E5"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Тиждень -->
+            <Button Content="Тиждень"
+                    MinWidth="82"
+                    Command="{Binding SetPeriodWeekCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsWeekPeriod}" Value="True">
+                                <Setter Property="Background" Value="#4F46E5"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Місяць -->
+            <Button Content="Місяць"
+                    MinWidth="82"
+                    Command="{Binding SetPeriodMonthCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsMonthPeriod}" Value="True">
+                                <Setter Property="Background" Value="#4F46E5"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Весь час -->
+            <Button Content="Весь час"
+                    MinWidth="82"
+                    Command="{Binding SetPeriodAllTimeCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsAllTimePeriod}" Value="True">
+                                <Setter Property="Background" Value="#4F46E5"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Свій період -->
+            <Button Content="Свій період"
+                    MinWidth="92"
+                    Command="{Binding SetPeriodCustomCommand}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCustomPeriod}" Value="True">
+                                <Setter Property="Background" Value="#4F46E5"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <!-- Вибір дат для кастомного періоду -->
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="4,0,0,0"
+                        Visibility="{Binding IsCustomPeriod, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="з"
+                           FontSize="11"
+                           Foreground="#64748B"
+                           VerticalAlignment="Center"
+                           Margin="4,0,4,0"/>
+                <DatePicker Width="125"
+                            Height="32"
+                            SelectedDate="{Binding CustomDateFrom}"
+                            DisplayDateEnd="{Binding CustomDateTo}"/>
+                <TextBlock Text="по"
+                           FontSize="11"
+                           Foreground="#64748B"
+                           VerticalAlignment="Center"
+                           Margin="6,0,4,0"/>
+                <DatePicker Width="125"
+                            Height="32"
+                            SelectedDate="{Binding CustomDateTo}"
+                            DisplayDateStart="{Binding CustomDateFrom}"/>
+            </StackPanel>
+
+            <!-- Бейдж поточного діапазону -->
+            <Border Background="#EEF2FF"
+                    BorderBrush="#C7D2FE"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="12,0"
+                    Height="32"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center">
+                <TextBlock Text="{Binding CurrentPeriodText}"
+                           Foreground="#4F46E5"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+        </StackPanel>
+    </DockPanel>
+</UserControl>
