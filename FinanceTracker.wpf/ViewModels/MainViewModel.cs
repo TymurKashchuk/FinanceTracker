@@ -22,7 +22,7 @@ namespace FinanceTracker.wpf.ViewModels
         Today,
         ThisWeek,
         ThisMonth,
-        Last30Days
+        AllTime
     }
 
     public enum TransactionType
@@ -31,29 +31,100 @@ namespace FinanceTracker.wpf.ViewModels
         Expense
     }
 
+    public enum NavigationTab
+    {
+        Dashboard,
+        Transactions,
+        Analytics
+    }
+
     public class MainViewModel : INotifyPropertyChanged
     {
+        private NavigationTab _currentTab = NavigationTab.Dashboard;
+        public NavigationTab CurrentTab
+        {
+            get => _currentTab;
+            set
+            {
+                _currentTab = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsDashboardTab));
+                OnPropertyChanged(nameof(IsTransactionsTab));
+                OnPropertyChanged(nameof(IsAnalyticsTab));
+                OnPropertyChanged(nameof(CurrentPageTitle));
+                OnPropertyChanged(nameof(CurrentPageSubtitle));
+            }
+        }
+
+        public bool IsDashboardTab => CurrentTab == NavigationTab.Dashboard;
+        public bool IsTransactionsTab => CurrentTab == NavigationTab.Transactions;
+        public bool IsAnalyticsTab => CurrentTab == NavigationTab.Analytics;
+
+        public string CurrentPageTitle => CurrentTab switch
+        {
+            NavigationTab.Dashboard => "Дашборд",
+            NavigationTab.Transactions => "Транзакції",
+            NavigationTab.Analytics => "Аналітика",
+            _ => "Фінанси"
+        };
+
+        public string CurrentPageSubtitle => CurrentTab switch
+        {
+            NavigationTab.Dashboard => "Огляд балансу, ключові показники та активність",
+            NavigationTab.Transactions => "Повна історія операцій з пошуком та фільтрами",
+            NavigationTab.Analytics => "Структура витрат, підсумки категорій та звіти",
+            _ => string.Empty
+        };
+
         public string CurrentPeriodText => SelectedPeriod switch
         {
-            PeriodType.Today => "Today",
-            PeriodType.ThisWeek => "This week",
-            PeriodType.ThisMonth => "This month",
-            PeriodType.Last30Days => "30 days",
-            _ => "Custom"
+            PeriodType.Today => "Сьогодні",
+            PeriodType.ThisWeek => "Тиждень",
+            PeriodType.ThisMonth => "Місяць",
+            PeriodType.AllTime => "Весь час",
+            _ => "Весь час"
         };
 
         private readonly IFinanceService _financeService;
 
         public ObservableCollection<Transaction> Transactions { get; } = new();
+        public ObservableCollection<Transaction> FilteredTransactions { get; } = new();
         public ObservableCollection<Transaction> RecentTransactions { get; } = new();
         public ObservableCollection<Account> Accounts { get; } = new();
+        public ObservableCollection<string> AccountFilterOptions { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
         public ObservableCollection<Category> FilteredCategories { get; } = new();
         public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Expense, TransactionType.Income };
-        public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.Last30Days };
+        public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.AllTime };
 
         public bool HasRecentTransactions => RecentTransactions.Count > 0;
         public bool HasExpenses => TopExpenseCategories.Count > 0;
+
+        private string _searchText = string.Empty;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
+                OnPropertyChanged();
+                ApplyTransactionFilter();
+            }
+        }
+
+        private string _selectedAccountFilter = "Всі рахунки";
+        public string SelectedAccountFilter
+        {
+            get => _selectedAccountFilter;
+            set
+            {
+                _selectedAccountFilter = value;
+                OnPropertyChanged();
+                ApplyTransactionFilter();
+            }
+        }
+
+        public int FilteredTransactionsCount => FilteredTransactions.Count;
 
         private DateTime _selectedDate = DateTime.Today;
         public DateTime SelectedDate
@@ -133,9 +204,16 @@ namespace FinanceTracker.wpf.ViewModels
         public ICommand AddCommand { get; }
         public ICommand ExportCsvCommand { get; }
         public ICommand DeleteTransactionCommand { get; }
+        public ICommand ClearFormCommand { get; }
+        public ICommand ClearSearchCommand { get; }
         public ICommand SetPeriodTodayCommand { get; }
         public ICommand SetPeriodWeekCommand { get; }
         public ICommand SetPeriodMonthCommand { get; }
+        public ICommand SetPeriodAllTimeCommand { get; }
+        public ICommand SetPeriodLast30DaysCommand => SetPeriodAllTimeCommand;
+        public ICommand SetTabDashboardCommand { get; }
+        public ICommand SetTabTransactionsCommand { get; }
+        public ICommand SetTabAnalyticsCommand { get; }
 
         public MainViewModel()
         {
@@ -144,10 +222,17 @@ namespace FinanceTracker.wpf.ViewModels
             AddCommand = new RelayCommand(async _ => await AddAsync());
             ExportCsvCommand = new RelayCommand(async _ => await ExportCsvAsync());
             DeleteTransactionCommand = new RelayCommand(async obj => await DeleteTransactionAsync(obj));
+            ClearFormCommand = new RelayCommand(_ => ResetForm());
+            ClearSearchCommand = new RelayCommand(_ => SearchText = string.Empty);
 
             SetPeriodTodayCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.Today);
             SetPeriodWeekCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisWeek);
             SetPeriodMonthCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisMonth);
+            SetPeriodAllTimeCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.AllTime);
+
+            SetTabDashboardCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Dashboard);
+            SetTabTransactionsCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Transactions);
+            SetTabAnalyticsCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Analytics);
 
             _ = InitializeAsync();
         }
@@ -165,6 +250,14 @@ namespace FinanceTracker.wpf.ViewModels
             foreach (var a in accounts) Accounts.Add(a);
             SelectedAccount ??= Accounts.FirstOrDefault();
 
+            AccountFilterOptions.Clear();
+            AccountFilterOptions.Add("Всі рахунки");
+            foreach (var a in Accounts) AccountFilterOptions.Add(a.Name);
+            if (!AccountFilterOptions.Contains(SelectedAccountFilter))
+            {
+                SelectedAccountFilter = "Всі рахунки";
+            }
+
             Categories.Clear();
             var categories = await _financeService.GetCategoriesAsync();
             foreach (var c in categories) Categories.Add(c);
@@ -174,6 +267,7 @@ namespace FinanceTracker.wpf.ViewModels
             Transactions.Clear();
             var items = await _financeService.GetTransactionsAsync(from, to);
             foreach (var t in items) Transactions.Add(t);
+            ApplyTransactionFilter();
 
             AccountBalances.Clear();
             var balances = await _financeService.GetAccountBalancesAsync();
@@ -250,6 +344,31 @@ namespace FinanceTracker.wpf.ViewModels
             }
             SelectedCategory = FilteredCategories.FirstOrDefault(c => c.Id == previousSelectedId) 
                                ?? FilteredCategories.FirstOrDefault();
+        }
+
+        public void ApplyTransactionFilter()
+        {
+            FilteredTransactions.Clear();
+            var query = Transactions.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var term = SearchText.Trim().ToLower();
+                query = query.Where(t => (t.Description != null && t.Description.ToLower().Contains(term))
+                                      || (t.Category != null && t.Category.Name.ToLower().Contains(term)));
+            }
+
+            if (!string.IsNullOrEmpty(SelectedAccountFilter) && SelectedAccountFilter != "Всі рахунки")
+            {
+                query = query.Where(t => t.Account != null && t.Account.Name == SelectedAccountFilter);
+            }
+
+            foreach (var t in query)
+            {
+                FilteredTransactions.Add(t);
+            }
+
+            OnPropertyChanged(nameof(FilteredTransactionsCount));
         }
 
         public async Task AddAsync()
@@ -329,7 +448,7 @@ namespace FinanceTracker.wpf.ViewModels
                 PeriodType.Today => (DateTime.Now.Date, DateTime.Now.Date.AddDays(1).AddTicks(-1)),
                 PeriodType.ThisWeek => (StartOfWeek(DateTime.Now), EndOfWeek(DateTime.Now)),
                 PeriodType.ThisMonth => (StartOfMonth(DateTime.Now), EndOfMonth(DateTime.Now)),
-                PeriodType.Last30Days => (DateTime.Now.AddDays(-30), DateTime.Now),
+                PeriodType.AllTime => (null, null),
                 _ => (null, null)
             };
         }

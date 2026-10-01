@@ -7,10 +7,16 @@
         xmlns:views="clr-namespace:FinanceTracker.wpf.Views"
         xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
         mc:Ignorable="d"
-        Title="Finance Tracker"
-        Height="660"
-        Width="1200"
-        Background="#F3F4F6"
+        Title="FinanceTracker — Особисті фінанси"
+        Height="780"
+        Width="1260"
+        MinWidth="1100"
+        MinHeight="660"
+        Background="#F8FAFC"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
         WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
@@ -19,107 +25,400 @@
 
     <Window.Resources>
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <conv:BalanceToBrushConverter x:Key="BalanceToBrushConverter"/>
+        <conv:TransactionTypeToBrushConverter x:Key="TransactionTypeToBrushConverter"/>
     </Window.Resources>
 
-    <DockPanel Margin="16">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Лівий сайдбар -->
+            <ColumnDefinition Width="250"/>
+            <!-- Основна робоча область -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Верхня панель-->
-        <Border Background="White"
-                CornerRadius="8"
-                Padding="15"
-                DockPanel.Dock="Top">
-            <StackPanel>
+        <!-- ======================================================== -->
+        <!--                   1. ЛІВИЙ САЙДБАР                      -->
+        <!-- ======================================================== -->
+        <Border Grid.Column="0"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="0,0,1,0">
+            <Grid Margin="16,20,16,16">
+                <Grid.RowDefinitions>
+                    <!-- Логотип і назва -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Меню навігації -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Розділювач -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Список рахунків -->
+                    <RowDefinition Height="*"/>
+                    <!-- Нижня панель: Експорт -->
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <WrapPanel Margin="0,0,0,10">
+                <!-- Логотип бренду -->
+                <StackPanel Grid.Row="0" Margin="4,0,4,22">
+                    <DockPanel LastChildFill="True">
+                        <Border Width="38" Height="38"
+                                Background="#4F46E5"
+                                CornerRadius="9"
+                                Margin="0,0,10,0"
+                                DockPanel.Dock="Left">
+                            <!-- SVG Іконка гаманця -->
+                            <Path Data="{StaticResource GeoWallet}"
+                                  Fill="White"
+                                  Width="18" Height="18"
+                                  Stretch="Uniform"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Border>
 
-                    <TextBox Width="180"
-                             ToolTip="Опис"
-                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <TextBox Width="90"
-                             ToolTip="Сума"
-                             Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
-
-                    <DatePicker Width="120"
-                                SelectedDate="{Binding SelectedDate}"
-                                Margin="0,0,8,0"
-                                ToolTip="Дата транзакції"/>
-
-                    <ComboBox Width="130"
-                              ItemsSource="{Binding Accounts}"
-                              DisplayMemberPath="Name"
-                              SelectedItem="{Binding SelectedAccount}"
-                              ToolTip="Рахунок"/>
-
-                    <ComboBox Width="110"
-                              ItemsSource="{Binding TransactionTypes}"
-                              SelectedItem="{Binding TransactionType}"
-                              Margin="0,0,8,0"
-                              ToolTip="Тип транзакції"/>
-
-                    <ComboBox Width="140"
-                              ItemsSource="{Binding FilteredCategories}"
-                              DisplayMemberPath="Name"
-                              SelectedItem="{Binding SelectedCategory}"
-                              ToolTip="Категорія"/>
-
-                    <!-- ПЕРІОДИ -->
-                    <ComboBox Width="110"
-                              ItemsSource="{Binding PeriodTypes}"
-                              SelectedItem="{Binding SelectedPeriod}"/>
-
-                    <Button Content="Today"
-                            Width="65"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodTodayCommand}"/>
-                    <Button Content="Week"
-                            Width="65"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodWeekCommand}"/>
-                    <Button Content="Month"
-                            Width="65"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodMonthCommand}"/>
-
-                    <!-- ЛЕЙБЛ ПОТОЧНОГО ПЕРІОДУ -->
-                    <TextBlock Text="{Binding CurrentPeriodText}"
-                               Foreground="#6B7280"
-                               VerticalAlignment="Center"
-                               Margin="5,0"
-                               FontSize="12"/>
-
-                </WrapPanel>
-
-                <!-- Кнопки -->
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-
-                    <Button Content="Add"
-                            Width="100"
-                            Command="{Binding AddCommand}"/>
-                    
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Finance"
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           Foreground="#0F172A"/>
+                                <TextBlock Text="Tracker"
+                                           FontWeight="Medium"
+                                           FontSize="16"
+                                           Foreground="#4F46E5"/>
+                                <Border Background="#EEF2FF"
+                                        CornerRadius="4"
+                                        Padding="5,1"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="v2.0"
+                                               FontSize="10"
+                                               FontWeight="Bold"
+                                               Foreground="#4F46E5"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Особистий бюджет"
+                                       FontSize="11"
+                                       Foreground="#64748B"/>
+                        </StackPanel>
+                    </DockPanel>
                 </StackPanel>
 
-            </StackPanel>
+                <!-- Меню навігації -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                    <TextBlock Text="НАВІГАЦІЯ"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#94A3B8"
+                               Margin="8,0,0,8"/>
+
+                    <!-- Кнопка 1: Дашборд -->
+                    <Button Style="{StaticResource SidebarNavButtonStyle}"
+                            Command="{Binding SetTabDashboardCommand}">
+                        <Button.Triggers>
+                            <!-- Visual indication via Style triggers or custom template -->
+                        </Button.Triggers>
+                        <DockPanel LastChildFill="True">
+                            <Path Data="{StaticResource GeoDashboard}"
+                                  Fill="#4F46E5"
+                                  Width="15" Height="15"
+                                  Stretch="Uniform"
+                                  Margin="0,0,10,0"
+                                  VerticalAlignment="Center"/>
+                            <TextBlock Text="Дашборд"
+                                       FontWeight="SemiBold"
+                                       Foreground="#0F172A"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Button>
+
+                    <!-- Кнопка 2: Транзакції -->
+                    <Button Style="{StaticResource SidebarNavButtonStyle}"
+                            Command="{Binding SetTabTransactionsCommand}">
+                        <DockPanel LastChildFill="True">
+                            <Path Data="{StaticResource GeoTransactions}"
+                                  Fill="#64748B"
+                                  Width="15" Height="15"
+                                  Stretch="Uniform"
+                                  Margin="0,0,10,0"
+                                  VerticalAlignment="Center"/>
+                            <TextBlock Text="Транзакції"
+                                       Foreground="#0F172A"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Button>
+
+                    <!-- Кнопка 3: Аналітика -->
+                    <Button Style="{StaticResource SidebarNavButtonStyle}"
+                            Command="{Binding SetTabAnalyticsCommand}">
+                        <DockPanel LastChildFill="True">
+                            <Path Data="{StaticResource GeoAnalytics}"
+                                  Fill="#64748B"
+                                  Width="15" Height="15"
+                                  Stretch="Uniform"
+                                  Margin="0,0,10,0"
+                                  VerticalAlignment="Center"/>
+                            <TextBlock Text="Аналітика та звіти"
+                                       Foreground="#0F172A"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Розділювач -->
+                <Separator Grid.Row="2" Background="#E2E8F0" Margin="0,0,0,14"/>
+
+                <!-- Блок «Мої рахунки» -->
+                <Grid Grid.Row="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="МОЇ РАХУНКИ"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#94A3B8"
+                               Margin="8,0,0,8"/>
+
+                    <!-- Список рахунків -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+                        <ItemsControl ItemsSource="{Binding AccountBalances}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F8FAFC"
+                                            BorderBrush="#F1F5F9"
+                                            BorderThickness="1"
+                                            CornerRadius="7"
+                                            Padding="10,7"
+                                            Margin="0,0,0,6">
+                                        <DockPanel LastChildFill="True">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="12"
+                                                       FontWeight="Medium"
+                                                       Foreground="#334155"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Balance, StringFormat='{}{0:N2} ₴'}"
+                                                       FontSize="12"
+                                                       FontWeight="Bold"
+                                                       HorizontalAlignment="Right"
+                                                       Foreground="{Binding Balance, Converter={StaticResource BalanceToBrushConverter}}"
+                                                       VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Картка загального балансу в сайдбарі -->
+                    <Border Grid.Row="2"
+                            Background="#EEF2FF"
+                            CornerRadius="8"
+                            Padding="12,10"
+                            Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Загальний баланс"
+                                       FontSize="11"
+                                       FontWeight="Medium"
+                                       Foreground="#4F46E5"/>
+                            <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:N2} ₴'}"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Foreground="#1E1B4B"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Нижня кнопка: Експорт CSV -->
+                <Button Grid.Row="4"
+                        Style="{StaticResource PeriodButtonStyle}"
+                        Command="{Binding ExportCsvCommand}"
+                        Height="36"
+                        Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Path Data="{StaticResource GeoDownload}"
+                              Fill="#475569"
+                              Width="14" Height="14"
+                              Stretch="Uniform"
+                              Margin="0,0,8,0"
+                              VerticalAlignment="Center"/>
+                        <TextBlock Text="Експорт в CSV"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </Border>
 
-        <!-- Вкладки -->
-        <TabControl DockPanel.Dock="Top"
-                    Margin="0,15,0,0"
-                    Background="Transparent"
-                    BorderBrush="Transparent">
-            <TabItem Header="Home">
-                <views:HomeView/>
-            </TabItem>
+        <!-- ======================================================== -->
+        <!--               2. ОСНОВНА РОБОЧА ОБЛАСТЬ                 -->
+        <!-- ======================================================== -->
+        <Grid Grid.Column="1" Margin="22,18,22,18">
+            <Grid.RowDefinitions>
+                <!-- Верхня панель: Заголовок + Періоди -->
+                <RowDefinition Height="Auto"/>
+                <!-- Панель швидкого додавання операції -->
+                <RowDefinition Height="Auto"/>
+                <!-- Контент поточної сторінки -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <TabItem Header="Transactions">
-                <views:TransactionsView/>
-            </TabItem>
+            <!-- 2.1. Верхній рядок: Заголовок + вибір періоду -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,14" LastChildFill="False">
+                <!-- Ліворуч: Назва сторінки та опис -->
+                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentPageTitle}"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="#0F172A"/>
+                    <TextBlock Text="{Binding CurrentPageSubtitle}"
+                               FontSize="12"
+                               Foreground="#64748B"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
 
-            <TabItem Header="Summary">
-                <views:SummaryView DataContext="{Binding}"/>
-            </TabItem>
-        </TabControl>
+                <!-- Праворуч: Селектор глобального періоду -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <Path Data="{StaticResource GeoCalendar}"
+                          Fill="#64748B"
+                          Width="14" Height="14"
+                          Stretch="Uniform"
+                          Margin="0,0,8,0"
+                          VerticalAlignment="Center"/>
 
-    </DockPanel>
+                    <Button Content="Сьогодні"
+                            MinWidth="84"
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodTodayCommand}"/>
+                    <Button Content="Тиждень"
+                            MinWidth="84"
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodWeekCommand}"/>
+                    <Button Content="Місяць"
+                            MinWidth="84"
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodMonthCommand}"/>
+                    <Button Content="Весь час"
+                            MinWidth="84"
+                            Style="{StaticResource PeriodButtonStyle}"
+                            Command="{Binding SetPeriodAllTimeCommand}"/>
+
+                    <Border Background="#EEF2FF"
+                            BorderBrush="#C7D2FE"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Width="95"
+                            Height="32"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentPeriodText}"
+                                   Foreground="#4F46E5"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- 2.2. Форма швидкого додавання транзакції -->
+            <Border Grid.Row="1"
+                    Background="White"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="16,12"
+                    Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Швидке додавання операції"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="#334155"
+                               Margin="2,0,0,8"/>
+
+                    <WrapPanel VerticalAlignment="Center">
+                        <!-- Опис -->
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Опис" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
+                            <TextBox Width="190"
+                                     Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <!-- Сума -->
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Сума (₴)" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
+                            <TextBox Width="95"
+                                     Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <!-- Дата -->
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Дата" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
+                            <DatePicker Width="125"
+                                        SelectedDate="{Binding SelectedDate}"/>
+                        </StackPanel>
+
+                        <!-- Рахунок -->
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Рахунок" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
+                            <ComboBox Width="130"
+                                      ItemsSource="{Binding Accounts}"
+                                      DisplayMemberPath="Name"
+                                      SelectedItem="{Binding SelectedAccount}"/>
+                        </StackPanel>
+
+                        <!-- Тип -->
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Тип" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
+                            <ComboBox Width="110"
+                                      ItemsSource="{Binding TransactionTypes}"
+                                      SelectedItem="{Binding TransactionType}"/>
+                        </StackPanel>
+
+                        <!-- Категорія -->
+                        <StackPanel Margin="0,0,12,0">
+                            <TextBlock Text="Категорія" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
+                            <ComboBox Width="140"
+                                      ItemsSource="{Binding FilteredCategories}"
+                                      DisplayMemberPath="Name"
+                                      SelectedItem="{Binding SelectedCategory}"/>
+                        </StackPanel>
+
+                        <!-- Дії -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,0,0,1">
+                            <Button Content="+ Додати"
+                                    MinWidth="110"
+                                    Height="36"
+                                    Padding="16,6"
+                                    Command="{Binding AddCommand}"/>
+
+                            <Button Content="Скинути"
+                                    MinWidth="85"
+                                    Height="36"
+                                    Margin="6,0,0,0"
+                                    Padding="14,6"
+                                    Style="{StaticResource PeriodButtonStyle}"
+                                    Command="{Binding ClearFormCommand}"/>
+                        </StackPanel>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 2.3. Вміст активної сторінки -->
+            <Grid Grid.Row="2">
+                <!-- 1. Дашборд -->
+                <views:HomeView Visibility="{Binding IsDashboardTab, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <!-- 2. Транзакції -->
+                <views:TransactionsView Visibility="{Binding IsTransactionsTab, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <!-- 3. Аналітика -->
+                <views:SummaryView Visibility="{Binding IsAnalyticsTab, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </Grid>
+        </Grid>
+    </Grid>
 </Window>
