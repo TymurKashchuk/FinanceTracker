@@ -442,7 +442,8 @@
                                    Margin="4,0,4,0"/>
                         <DatePicker Width="125"
                                     Height="32"
-                                    SelectedDate="{Binding CustomDateFrom}"/>
+                                    SelectedDate="{Binding CustomDateFrom}"
+                                    DisplayDateEnd="{Binding CustomDateTo}"/>
                         <TextBlock Text="по"
                                    FontSize="11"
                                    Foreground="#64748B"
@@ -450,7 +451,8 @@
                                    Margin="6,0,4,0"/>
                         <DatePicker Width="125"
                                     Height="32"
-                                    SelectedDate="{Binding CustomDateTo}"/>
+                                    SelectedDate="{Binding CustomDateTo}"
+                                    DisplayDateStart="{Binding CustomDateFrom}"/>
                     </StackPanel>
 
                     <!-- Бейдж поточного діапазону -->
@@ -599,7 +601,9 @@
 
                                 <DatePicker Width="145"
                                             Height="36"
-                                            SelectedDate="{Binding SelectedDate}"/>
+                                            SelectedDate="{Binding SelectedDate}"
+                                            DisplayDateStart="2000-01-01"
+                                            DisplayDateEnd="2035-12-31"/>
 
                                 <!-- Швидкі кнопки дати -->
                                 <Button Content="Сьогодні"

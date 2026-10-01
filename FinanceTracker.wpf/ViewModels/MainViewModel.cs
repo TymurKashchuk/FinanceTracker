@@ -100,10 +100,18 @@ namespace FinanceTracker.wpf.ViewModels
             get => _customDateFrom;
             set
             {
-                _customDateFrom = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentPeriodText));
-                if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
+                if (_customDateFrom != value)
+                {
+                    _customDateFrom = value;
+                    if (_customDateFrom > _customDateTo)
+                    {
+                        _customDateTo = _customDateFrom;
+                        OnPropertyChanged(nameof(CustomDateTo));
+                    }
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CurrentPeriodText));
+                    if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
+                }
             }
         }
 
@@ -113,10 +121,18 @@ namespace FinanceTracker.wpf.ViewModels
             get => _customDateTo;
             set
             {
-                _customDateTo = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentPeriodText));
-                if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
+                if (_customDateTo != value)
+                {
+                    _customDateTo = value;
+                    if (_customDateTo < _customDateFrom)
+                    {
+                        _customDateFrom = _customDateTo;
+                        OnPropertyChanged(nameof(CustomDateFrom));
+                    }
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CurrentPeriodText));
+                    if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
+                }
             }
         }
 
@@ -507,9 +523,64 @@ namespace FinanceTracker.wpf.ViewModels
 
         public async Task AddAsync()
         {
-            if (string.IsNullOrWhiteSpace(Description) || Amount <= 0 || SelectedAccount == null)
+            // 1. Валідація опису
+            if (string.IsNullOrWhiteSpace(Description))
             {
-                SetStatusMessage("Будь ласка, введіть опис, коректну суму (> 0) та оберіть рахунок", isError: true);
+                SetStatusMessage("Будь ласка, вкажіть опис операції", isError: true);
+                return;
+            }
+
+            var trimmedDesc = Description.Trim();
+            if (trimmedDesc.Length < 2)
+            {
+                SetStatusMessage("Опис операції занадто короткий (мінімум 2 символи)", isError: true);
+                return;
+            }
+
+            if (trimmedDesc.Length > 100)
+            {
+                SetStatusMessage("Опис операції занадто довгий (максимум 100 символів)", isError: true);
+                return;
+            }
+
+            // 2. Валідація суми
+            if (Amount <= 0)
+            {
+                SetStatusMessage("Сума операції має бути більшою за 0 ₴", isError: true);
+                return;
+            }
+
+            if (Amount > 100_000_000)
+            {
+                SetStatusMessage("Сума операції не може перевищувати 100 000 000 ₴", isError: true);
+                return;
+            }
+
+            // 3. Валідація рахунку
+            if (SelectedAccount == null)
+            {
+                SetStatusMessage("Будь ласка, оберіть рахунок для операції", isError: true);
+                return;
+            }
+
+            // 4. Валідація категорії
+            if (SelectedCategory == null)
+            {
+                SetStatusMessage("Будь ласка, оберіть категорію витрати/доходу", isError: true);
+                return;
+            }
+
+            // 5. Валідація дати
+            var opDate = SelectedDate ?? DateTime.Today;
+            if (opDate.Date > DateTime.Today.AddYears(1))
+            {
+                SetStatusMessage("Дата операції не може бути пізнішою за 1 рік уперед", isError: true);
+                return;
+            }
+
+            if (opDate.Date < new DateTime(2000, 1, 1))
+            {
+                SetStatusMessage("Дата операції не може бути ранішою за 01.01.2000", isError: true);
                 return;
             }
 
@@ -517,12 +588,12 @@ namespace FinanceTracker.wpf.ViewModels
             {
                 var transaction = new Transaction
                 {
-                    Description = Description.Trim(),
+                    Description = trimmedDesc,
                     Amount = Amount,
-                    Date = (SelectedDate ?? DateTime.Today).Date + DateTime.Now.TimeOfDay,
+                    Date = opDate.Date + DateTime.Now.TimeOfDay,
                     IsIncome = TransactionType == TransactionType.Income,
                     AccountId = SelectedAccount.Id,
-                    CategoryId = SelectedCategory?.Id
+                    CategoryId = SelectedCategory.Id
                 };
                 await _financeService.AddTransactionAsync(transaction);
 
