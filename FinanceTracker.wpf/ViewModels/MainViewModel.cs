@@ -1,149 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Windows.Input;
+using System.Threading.Tasks;
+using System.Windows.Media;
 using FinanceTracker.wpf.Models;
 using FinanceTracker.wpf.Services;
 using LiveCharts;
 using LiveCharts.Wpf;
-using Microsoft.Win32;
-using static FinanceTracker.wpf.Services.FinanceService;
 
 namespace FinanceTracker.wpf.ViewModels
 {
-    public enum PeriodType
+    public partial class MainViewModel : INotifyPropertyChanged
     {
-        Today,
-        ThisWeek,
-        ThisMonth,
-        Last30Days
-    }
-
-    public enum TransactionType
-    {
-        Income,
-        Expense
-    }
-
-    public class MainViewModel : INotifyPropertyChanged
-    {
-        public string CurrentPeriodText => SelectedPeriod switch
-        {
-            PeriodType.Today => "Today",
-            PeriodType.ThisWeek => "This week",
-            PeriodType.ThisMonth => "This month",
-            PeriodType.Last30Days => "30 days",
-            _ => "Custom"
-        };
-
         private readonly IFinanceService _financeService;
 
         public ObservableCollection<Transaction> Transactions { get; } = new();
+        public ObservableCollection<Transaction> FilteredTransactions { get; } = new();
         public ObservableCollection<Account> Accounts { get; } = new();
         public ObservableCollection<Category> Categories { get; } = new();
-        public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Income, TransactionType.Expense };
-        public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.Last30Days };
+        public ObservableCollection<Category> FilteredCategories { get; } = new();
+        public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Expense, TransactionType.Income };
+        public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.AllTime, PeriodType.Custom };
 
-        private PeriodType _selectedPeriod = PeriodType.ThisMonth;
-        public PeriodType SelectedPeriod
+        private string? _statusMessage;
+        public string? StatusMessage
         {
-            get => _selectedPeriod;
+            get => _statusMessage;
             set
             {
-                _selectedPeriod = value;
+                _statusMessage = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentPeriodText));
-                _ = LoadAsync();
+                OnPropertyChanged(nameof(HasStatusMessage));
             }
         }
 
-        private Account? _selectedAccount;
-        public Account? SelectedAccount
-        {
-            get => _selectedAccount;
-            set { _selectedAccount = value; OnPropertyChanged(); }
-        }
+        public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
 
-        private Category? _selectedCategory;
-        public Category? SelectedCategory
+        private bool _isStatusError;
+        public bool IsStatusError
         {
-            get => _selectedCategory;
-            set { _selectedCategory = value; OnPropertyChanged(); }
-        }
-
-        private Transaction? _selectedTransaction;
-        public Transaction? SelectedTransaction
-        {
-            get => _selectedTransaction;
-            set { _selectedTransaction = value; OnPropertyChanged(); }
-        }
-
-        private string _description = string.Empty;
-        public string Description
-        {
-            get => _description;
-            set { _description = value; OnPropertyChanged(); }
-        }
-
-        private decimal _amount;
-        public decimal Amount
-        {
-            get => _amount;
-            set { _amount = value; OnPropertyChanged(); }
-        }
-
-        private TransactionType _transactionType = TransactionType.Income;
-        public TransactionType TransactionType
-        {
-            get => _transactionType;
+            get => _isStatusError;
             set
             {
-                _transactionType = value;
+                _isStatusError = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(IsExpenseSelected));
-                if (value == TransactionType.Income) SelectedCategory = null;
+                OnPropertyChanged(nameof(StatusBackgroundBrush));
+                OnPropertyChanged(nameof(StatusForegroundBrush));
             }
         }
 
-        public bool IsExpenseSelected => TransactionType == TransactionType.Expense;
+        public Brush StatusBackgroundBrush => IsStatusError
+            ? new SolidColorBrush(Color.FromRgb(0xFE, 0xE2, 0xE2))
+            : new SolidColorBrush(Color.FromRgb(0xD1, 0xFA, 0xE5));
 
-        public SeriesCollection ExpenseSeries { get; set; } = new();
-        public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
-        public ObservableCollection<CategorySummaryDto> CategorySummaries { get; } = new();
-        public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
+        public Brush StatusForegroundBrush => IsStatusError
+            ? new SolidColorBrush(Color.FromRgb(0x99, 0x1B, 0x1B))
+            : new SolidColorBrush(Color.FromRgb(0x06, 0x5F, 0x46));
 
-        public ICommand AddCommand { get; }
-        public ICommand ExportCsvCommand { get; }
-        public ICommand DeleteTransactionCommand { get; }
-        public ICommand SetPeriodTodayCommand { get; }
-        public ICommand SetPeriodWeekCommand { get; }
-        public ICommand SetPeriodMonthCommand { get; }
-
-        public MainViewModel()
+        public void SetStatusMessage(string message, bool isError)
         {
-            _financeService = new FinanceService();
-
-            AddCommand = new RelayCommand(async _ => await AddAsync());
-            ExportCsvCommand = new RelayCommand(async _ => await ExportCsvAsync());
-            DeleteTransactionCommand = new RelayCommand(async obj => await DeleteTransactionAsync(obj));
-
-            SetPeriodTodayCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.Today);
-            SetPeriodWeekCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisWeek);
-            SetPeriodMonthCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisMonth);
-
-            _ = InitializeAsync();
+            StatusMessage = message;
+            IsStatusError = isError;
         }
 
-        private async Task InitializeAsync()
+        public MainViewModel() : this(new FinanceService())
         {
-            await _financeService.SeedAsync();
-            await LoadAsync();
+        }
+
+        public MainViewModel(IFinanceService financeService)
+        {
+            _financeService = financeService ?? new FinanceService();
+
+            InitializeNavigationCommands();
+            InitializePeriodCommands();
+            InitializeQuickAddCommands();
+            InitializeTransactionCommands();
+
+            ResetForm();
+            _ = LoadAsync();
         }
 
         public async Task LoadAsync()
@@ -151,17 +87,23 @@ namespace FinanceTracker.wpf.ViewModels
             Accounts.Clear();
             var accounts = await _financeService.GetAccountsAsync();
             foreach (var a in accounts) Accounts.Add(a);
-            SelectedAccount ??= Accounts.FirstOrDefault();
+
+            AccountFilterOptions.Clear();
+            AccountFilterOptions.Add("Всі рахунки");
+            foreach (var a in accounts) AccountFilterOptions.Add(a.Name);
+
+            SelectedAccount = Accounts.FirstOrDefault();
 
             Categories.Clear();
             var categories = await _financeService.GetCategoriesAsync();
             foreach (var c in categories) Categories.Add(c);
-            SelectedCategory ??= Categories.FirstOrDefault();
+            UpdateFilteredCategories();
 
             var (from, to) = GetPeriodDates();
             Transactions.Clear();
             var items = await _financeService.GetTransactionsAsync(from, to);
             foreach (var t in items) Transactions.Add(t);
+            ApplyTransactionFilter();
 
             AccountBalances.Clear();
             var balances = await _financeService.GetAccountBalancesAsync();
@@ -174,6 +116,8 @@ namespace FinanceTracker.wpf.ViewModels
 
             TotalIncome = items.Where(t => t.IsIncome).Sum(t => t.Amount);
             TotalExpenses = items.Where(t => !t.IsIncome).Sum(t => t.Amount);
+            NetSavings = TotalIncome - TotalExpenses;
+            SavingsRate = TotalIncome > 0 ? (double)(NetSavings / TotalIncome * 100) : 0;
 
             TopExpenseCategories.Clear();
             var expenses = catSummaries.Where(c => !c.IsIncome && c.TotalAmount < 0).ToList();
@@ -187,7 +131,7 @@ namespace FinanceTracker.wpf.ViewModels
             }
             else
             {
-                TopExpenseCategoryName = "No expenses";
+                TopExpenseCategoryName = "Немає витрат";
                 TopExpenseCategoryAmount = 0;
             }
 
@@ -214,144 +158,26 @@ namespace FinanceTracker.wpf.ViewModels
                 });
             }
             OnPropertyChanged(nameof(ExpenseSeries));
-        }
 
-        public async Task AddAsync()
-        {
-            if (string.IsNullOrWhiteSpace(Description) || Amount <= 0 || SelectedAccount == null) return;
-            if (TransactionType == TransactionType.Expense && SelectedCategory == null) return;
-
-            try
+            RecentTransactions.Clear();
+            foreach (var t in items.Take(5))
             {
-                var transaction = new Transaction
-                {
-                    Description = Description,
-                    Amount = Amount,
-                    Date = DateTime.Now,
-                    IsIncome = TransactionType == TransactionType.Income,
-                    AccountId = SelectedAccount.Id,
-                    CategoryId = TransactionType == TransactionType.Expense ? SelectedCategory?.Id : null
-                };
-                await _financeService.AddTransactionAsync(transaction);
-
-                await LoadAsync();
-                ResetForm();
+                RecentTransactions.Add(t);
             }
-            catch (Exception ex)
+            OnPropertyChanged(nameof(HasRecentTransactions));
+            OnPropertyChanged(nameof(HasExpenses));
+
+            MonthlyBudgets.Clear();
+            var budgets = await _financeService.GetMonthlyBudgetsAsync(DateTime.Now.Year, DateTime.Now.Month);
+            foreach (var b in budgets)
             {
-                Debug.WriteLine(ex.Message);
-                MessageBox.Show($"Помилка: {ex.Message}");
+                MonthlyBudgets.Add(b);
             }
-        }
-
-        public async Task DeleteTransactionAsync(object obj)
-        {
-            if (obj is not Transaction transaction) return;
-
-            var result = MessageBox.Show("Видалити транзакцію?", "Підтвердження",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
-
-            await _financeService.DeleteTransactionAsync(transaction.Id);
-            await LoadAsync();
-        }
-
-        private async Task ExportCsvAsync()
-        {
-            var dialog = new SaveFileDialog
-            {
-                Filter = "CSV files (*.csv)|*.csv",
-                FileName = $"transactions_{DateTime.Now:yyyy-MM-dd}.csv"
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                var (from, to) = GetPeriodDates();
-                await _financeService.ExportTransactionsToCsvAsync(dialog.FileName, from, to);
-                MessageBox.Show("Експорт завершено!");
-            }
-        }
-
-        private void ResetForm()
-        {
-            Description = string.Empty;
-            Amount = 0;
-            TransactionType = TransactionType.Income;
-            SelectedAccount = Accounts.FirstOrDefault();
-            SelectedCategory = null;
-        }
-
-        private (DateTime? from, DateTime? to) GetPeriodDates()
-        {
-            return SelectedPeriod switch
-            {
-                PeriodType.Today => (DateTime.Now.Date, DateTime.Now.Date.AddDays(1).AddTicks(-1)),
-                PeriodType.ThisWeek => (StartOfWeek(DateTime.Now), EndOfWeek(DateTime.Now)),
-                PeriodType.ThisMonth => (StartOfMonth(DateTime.Now), EndOfMonth(DateTime.Now)),
-                PeriodType.Last30Days => (DateTime.Now.AddDays(-30), DateTime.Now),
-                _ => (null, null)
-            };
-        }
-
-        private decimal _totalBalance;
-        public decimal TotalBalance
-        {
-            get => _totalBalance;
-            set { _totalBalance = value; OnPropertyChanged(); }
-        }
-
-        private decimal _totalIncome;
-        public decimal TotalIncome
-        {
-            get => _totalIncome;
-            set { _totalIncome = value; OnPropertyChanged(); }
-        }
-
-        private decimal _totalExpenses;
-        public decimal TotalExpenses
-        {
-            get => _totalExpenses;
-            set { _totalExpenses = value; OnPropertyChanged(); }
-        }
-
-        private string _topExpenseCategoryName = "No expenses";
-        public string TopExpenseCategoryName
-        {
-            get => _topExpenseCategoryName;
-            set { _topExpenseCategoryName = value; OnPropertyChanged(); }
-        }
-
-        private decimal _topExpenseCategoryAmount;
-        public decimal TopExpenseCategoryAmount
-        {
-            get => _topExpenseCategoryAmount;
-            set { _topExpenseCategoryAmount = value; OnPropertyChanged(); }
-        }
-
-        public int TransactionCount => Transactions.Count;
-
-        public class TopExpenseCategory
-        {
-            public string Name { get; set; } = "";
-            public decimal Amount { get; set; }
-            public double Percentage { get; set; }
+            OnPropertyChanged(nameof(HasMonthlyBudgets));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        public static DateTime StartOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday)
-        {
-            var diff = (int)(dt.DayOfWeek - firstDayOfWeek);
-            if (diff < 0) diff += 7;
-            return dt.AddDays(-diff).Date;
-        }
-
-        public static DateTime EndOfWeek(DateTime dt, DayOfWeek firstDayOfWeek = DayOfWeek.Monday)
-            => StartOfWeek(dt, firstDayOfWeek).AddDays(6).Date.AddDays(1).AddTicks(-1);
-
-        public static DateTime StartOfMonth(DateTime dt) => new DateTime(dt.Year, dt.Month, 1);
-        public static DateTime EndOfMonth(DateTime dt) => StartOfMonth(dt).AddMonths(1).AddTicks(-1);
     }
 }

@@ -1,0 +1,177 @@
+<UserControl x:Class="FinanceTracker.wpf.Views.QuickAddView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
+             xmlns:vm="clr-namespace:FinanceTracker.wpf.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:MainViewModel}"
+             d:DesignHeight="160" d:DesignWidth="950">
+
+    <UserControl.Resources>
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <!-- Форма швидкого додавання транзакції -->
+    <Border Background="White"
+            BorderBrush="#E2E8F0"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="18,12">
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Заголовок + статус-повідомлення + кнопка згортання -->
+                <RowDefinition Height="Auto"/>
+                <!-- Вміст форми (згортається) -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Рядок 0: Заголовок форми + Живе статус-повідомлення + Кнопка Згорнути/Розгорнути -->
+            <DockPanel Grid.Row="0" LastChildFill="False">
+                <TextBlock Text="Швидке додавання операції"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           Foreground="#1E293B"
+                           DockPanel.Dock="Left"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <!-- Статус повідомлення (успіх/помилка) -->
+                    <Border Visibility="{Binding HasStatusMessage, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Background="{Binding StatusBackgroundBrush}"
+                            CornerRadius="5"
+                            Padding="10,3"
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{Binding StatusForegroundBrush}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"/>
+                    </Border>
+
+                    <!-- Кнопка Згорнути / + Нова операція -->
+                    <Button Content="{Binding QuickAddToggleText}"
+                            Style="{StaticResource DateQuickBadgeButtonStyle}"
+                            Command="{Binding ToggleQuickAddCommand}"
+                            Height="24"
+                            MinWidth="80"
+                            Padding="10,2"
+                            ToolTip="Показати або сховати форму додавання"/>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Рядок 1: Поля форми швидкого додавання (видимі коли розгорнуто) -->
+            <Grid Grid.Row="1"
+                  Margin="0,12,0,0"
+                  Visibility="{Binding IsQuickAddExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Підрядок 0: Опис, Сума, Тип, Категорія, Рахунок -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <!-- Опис (тягнеться на всю вільну ширину) -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Сума -->
+                        <ColumnDefinition Width="120"/>
+                        <!-- Тип -->
+                        <ColumnDefinition Width="120"/>
+                        <!-- Категорія -->
+                        <ColumnDefinition Width="150"/>
+                        <!-- Рахунок -->
+                        <ColumnDefinition Width="150"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Опис -->
+                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                        <TextBlock Text="Опис" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="36"/>
+                    </StackPanel>
+
+                    <!-- Сума -->
+                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                        <TextBlock Text="Сума (₴)" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                        <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="36"/>
+                    </StackPanel>
+
+                    <!-- Тип -->
+                    <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                        <TextBlock Text="Тип" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding TransactionTypes}"
+                                  SelectedItem="{Binding TransactionType}"
+                                  Height="36"/>
+                    </StackPanel>
+
+                    <!-- Категорія -->
+                    <StackPanel Grid.Column="3" Margin="0,0,12,0">
+                        <TextBlock Text="Категорія" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding FilteredCategories}"
+                                  DisplayMemberPath="Name"
+                                  SelectedItem="{Binding SelectedCategory}"
+                                  Height="36"/>
+                    </StackPanel>
+
+                    <!-- Рахунок -->
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Рахунок" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding Accounts}"
+                                  DisplayMemberPath="Name"
+                                  SelectedItem="{Binding SelectedAccount}"
+                                  Height="36"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Підрядок 1: Дата + пресети + Кнопки дій -->
+                <DockPanel Grid.Row="1" LastChildFill="False">
+                    <!-- Блок дати ліворуч -->
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                        <TextBlock Text="Дата:"
+                                   FontSize="11"
+                                   Foreground="#64748B"
+                                   VerticalAlignment="Center"
+                                   Margin="2,0,8,0"/>
+
+                        <DatePicker Width="145"
+                                    Height="36"
+                                    SelectedDate="{Binding SelectedDate}"
+                                    DisplayDateStart="2000-01-01"
+                                    DisplayDateEnd="2035-12-31"/>
+
+                        <!-- Швидкі кнопки дати -->
+                        <Button Content="Сьогодні"
+                                Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                Command="{Binding SetDateTodayCommand}"
+                                ToolTip="Встановити сьогоднішню дату"/>
+                        <Button Content="Вчора"
+                                Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                Command="{Binding SetDateYesterdayCommand}"
+                                ToolTip="Встановити вчорашню дату"/>
+                    </StackPanel>
+
+                    <!-- Кнопки дій праворуч -->
+                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                        <Button Content="Скинути"
+                                MinWidth="85"
+                                Height="36"
+                                Padding="14,6"
+                                Margin="0,0,8,0"
+                                Style="{StaticResource PeriodButtonStyle}"
+                                Command="{Binding ClearFormCommand}"/>
+
+                        <Button Content="+ Додати операцію"
+                                MinWidth="150"
+                                Height="36"
+                                Padding="18,6"
+                                IsDefault="True"
+                                Command="{Binding AddCommand}"/>
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

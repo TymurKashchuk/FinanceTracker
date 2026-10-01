@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="FinanceTracker.wpf.Views.HomeView"
+<UserControl x:Class="FinanceTracker.wpf.Views.HomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,151 +7,389 @@
              xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:MainViewModel}"
-             d:DesignHeight="400" d:DesignWidth="800"
+             d:DesignHeight="600" d:DesignWidth="950"
              Background="Transparent">
 
     <UserControl.Resources>
         <conv:BalanceToBrushConverter x:Key="BalanceToBrushConverter"/>
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <conv:TransactionTypeToBrushConverter x:Key="TransactionTypeToBrushConverter"/>
     </UserControl.Resources>
 
-    <Grid Margin="5">
-        <Border Background="White"
-                CornerRadius="12"
-                Padding="18">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="0,4,0,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <!-- 1. Картки ключових показників (KPI) -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <!-- Заголовок + період -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,12">
-                    <TextBlock Text="Finance Dashboard"
-                               FontWeight="Bold"
-                               FontSize="22"
-                               Foreground="#111827"/>
-
-                    <TextBlock Text="{Binding CurrentPeriodText}"
-                               Foreground="#6B7280"
-                               FontSize="14"
-                               Margin="0,4,0,0"/>
-                </StackPanel>
-
-                <!-- Overall Balance -->
-                <Border Grid.Row="1"
-                        Background="#F9FAFB"
+                <!-- Загальний баланс -->
+                <Border Grid.Column="0"
+                        Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="10"
-                        Padding="14,10"
-                        Margin="0,0,0,16">
+                        Padding="16"
+                        Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="Загальний баланс"
+                                   FontSize="12"
+                                   FontWeight="Medium"
+                                   Foreground="#6B7280"/>
+                        <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:N2} ₴'}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Margin="0,6,0,2"
+                                   Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
+                        <TextBlock Text="Всі активні рахунки"
+                                   FontSize="11"
+                                   Foreground="#9CA3AF"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Доходи -->
+                <Border Grid.Column="1"
+                        Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="16"
+                        Margin="4,0,4,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="Доходи"
+                                       FontSize="12"
+                                       FontWeight="Medium"
+                                       Foreground="#6B7280"/>
+                            <Border Background="#D1FAE5"
+                                    CornerRadius="4"
+                                    Padding="6,2"
+                                    HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource GeoArrowUp}"
+                                          Fill="#065F46"
+                                          Width="8" Height="8"
+                                          Stretch="Uniform"
+                                          Margin="0,0,4,0"
+                                          VerticalAlignment="Center"/>
+                                    <TextBlock Text="Дохід"
+                                               FontSize="10"
+                                               FontWeight="Bold"
+                                               Foreground="#065F46"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+                        <TextBlock Text="{Binding TotalIncome, StringFormat='{}+ {0:N2} ₴'}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Margin="0,6,0,2"
+                                   Foreground="#10B981"/>
+                        <TextBlock Text="за обраний період"
+                                   FontSize="11"
+                                   Foreground="#9CA3AF"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Витрати -->
+                <Border Grid.Column="2"
+                        Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="16"
+                        Margin="4,0,4,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="Витрати"
+                                       FontSize="12"
+                                       FontWeight="Medium"
+                                       Foreground="#6B7280"/>
+                            <Border Background="#FEE2E2"
+                                    CornerRadius="4"
+                                    Padding="6,2"
+                                    HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="{StaticResource GeoArrowDown}"
+                                          Fill="#991B1B"
+                                          Width="8" Height="8"
+                                          Stretch="Uniform"
+                                          Margin="0,0,4,0"
+                                          VerticalAlignment="Center"/>
+                                    <TextBlock Text="Витрати"
+                                               FontSize="10"
+                                               FontWeight="Bold"
+                                               Foreground="#991B1B"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+                        <TextBlock Text="{Binding TotalExpenses, StringFormat='{}- {0:N2} ₴'}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Margin="0,6,0,2"
+                                   Foreground="#EF4444"/>
+                        <TextBlock Text="за обраний період"
+                                   FontSize="11"
+                                   Foreground="#9CA3AF"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Чистий потік (Net) -->
+                <Border Grid.Column="3"
+                        Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="16"
+                        Margin="8,0,0,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="Чистий потік"
+                                       FontSize="12"
+                                       FontWeight="Medium"
+                                       Foreground="#6B7280"/>
+                            <Border Background="#EFF6FF"
+                                    CornerRadius="4"
+                                    Padding="5,1"
+                                    HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding SavingsRate, StringFormat='{}{0:F0}% збережено'}"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="#1D4ED8"/>
+                            </Border>
+                        </DockPanel>
+                        <TextBlock Text="{Binding NetSavings, StringFormat='{}{0:N2} ₴'}"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Margin="0,6,0,2"
+                                   Foreground="{Binding NetSavings, Converter={StaticResource BalanceToBrushConverter}}"/>
+                        <TextBlock Text="{Binding SavingsRate, StringFormat='Рівень заощаджень: {0:F1}%'}"
+                                   FontSize="11"
+                                   Foreground="#6B7280"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 2. Двоколонковий вміст: Останні операції + Топ витрат -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ліва колонка: Останні операції -->
+                <Border Grid.Column="0"
+                        Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="18"
+                        Margin="0,0,8,0">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="Overall Balance"
-                                       FontWeight="SemiBold"
-                                       FontSize="14"
-                                       Foreground="#374151"/>
-
-                            <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:C}'}"
-                                       FontSize="24"
+                        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                            <TextBlock Text="Останні операції"
+                                       FontSize="15"
                                        FontWeight="Bold"
-                                       Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
-                        </StackPanel>
+                                       Foreground="#111827"/>
+                            <TextBlock Text="5 останніх дій"
+                                       FontSize="12"
+                                       Foreground="#9CA3AF"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
 
-                        <Grid Grid.Column="1" Margin="20,0,0,0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
+                        <!-- Список операцій -->
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding RecentTransactions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#F3F4F6"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="6,9">
+                                        <DockPanel LastChildFill="True">
+                                            <!-- Кнопка швидкого видалення праворуч -->
+                                            <Button Style="{StaticResource ActionDeleteButtonStyle}"
+                                                    ToolTip="Видалити операцію"
+                                                    DockPanel.Dock="Right"
+                                                    Margin="6,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.DeleteTransactionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Path Data="{StaticResource GeoTrash}"
+                                                      Fill="#EF4444"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform"/>
+                                            </Button>
 
-                            <!-- Дохід -->
-                            <StackPanel Grid.Row="0" HorizontalAlignment="Right">
-                                <TextBlock Text="Income"
-                                           FontWeight="Medium"
-                                           FontSize="13"
-                                           Foreground="#1F2937"/>
+                                            <!-- Сума праворуч -->
+                                            <TextBlock Text="{Binding FormattedAmount}"
+                                                       FontSize="14"
+                                                       FontWeight="Bold"
+                                                       Foreground="{Binding IsIncome, Converter={StaticResource TransactionTypeToBrushConverter}}"
+                                                       DockPanel.Dock="Right"
+                                                       VerticalAlignment="Center"
+                                                       Margin="12,0,0,0"/>
 
-                                <TextBlock Text="{Binding TotalIncome, StringFormat='{}{0:C}'}"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="#10B981"/>
-                            </StackPanel>
+                                            <!-- Ліва частина: опис і метадані -->
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Description}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="13"
+                                                           Foreground="#1F2937"/>
+                                                
+                                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                    <!-- Бейдж категорії -->
+                                                    <Border Background="#F3F4F6"
+                                                            CornerRadius="4"
+                                                            Padding="6,1"
+                                                            Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding Category.Name, TargetNullValue='Без категорії'}"
+                                                                   FontSize="11"
+                                                                   Foreground="#4B5563"/>
+                                                    </Border>
 
-                            <!-- Витрати -->
-                            <StackPanel Grid.Row="1" HorizontalAlignment="Right">
-                                <TextBlock Text="Expenses"
-                                           FontWeight="Medium"
-                                           FontSize="13"
-                                           Foreground="#1F2937"/>
+                                                    <!-- Рахунок -->
+                                                    <TextBlock Text="{Binding Account.Name}"
+                                                               FontSize="11"
+                                                               Foreground="#6B7280"
+                                                               Margin="0,0,8,0"
+                                                               VerticalAlignment="Center"/>
 
-                                <TextBlock Text="{Binding TotalExpenses, StringFormat='{}{0:C}'}"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="#EF4444"/>
-                            </StackPanel>
-                        </Grid>
+                                                    <!-- Дата -->
+                                                    <TextBlock Text="{Binding Date, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
+                                                               FontSize="11"
+                                                               Foreground="#9CA3AF"
+                                                               VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Заглушка, якщо немає транзакцій -->
+                        <TextBlock Grid.Row="1"
+                                   Text="Операцій за обраний період поки що немає"
+                                   Foreground="#9CA3AF"
+                                   FontStyle="Italic"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Margin="0,40">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasRecentTransactions}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Grid>
                 </Border>
 
-                <!-- Роздільна лінія -->
-                <Border Grid.Row="2"
-                        Height="1"
-                        Background="#E5E7EB"
-                        Margin="0,0,0,16"/>
+                <!-- Права колонка: Топ витрат за категоріями -->
+                <Border Grid.Column="1"
+                        Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="18"
+                        Margin="8,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
 
-                <!-- Net + Savings -->
-                <Grid Grid.Row="3">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Net -->
-                    <Border Grid.Column="0"
-                            Background="#F9FAFB"
-                            CornerRadius="8"
-                            Padding="10"
-                            Margin="0,0,8,0">
-                        <StackPanel>
-                            <TextBlock Text="Net"
-                                       FontWeight="Medium"
-                                       FontSize="13"
-                                       Foreground="#374151"/>
-
-                            <TextBlock Text="{Binding TotalBalance, StringFormat='{}{0:C}'}"
-                                       FontSize="16"
+                        <DockPanel Grid.Row="0" Margin="0,0,0,14">
+                            <TextBlock Text="Топ витрат"
+                                       FontSize="15"
                                        FontWeight="Bold"
-                                       Foreground="{Binding TotalBalance, Converter={StaticResource BalanceToBrushConverter}}"/>
-                        </StackPanel>
-                    </Border>
+                                       Foreground="#111827"/>
+                            <TextBlock Text="За категоріями"
+                                       FontSize="12"
+                                       Foreground="#9CA3AF"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
 
-                    <!-- Savings -->
-                    <Border Grid.Column="1"
-                            Background="#F9FAFB"
-                            CornerRadius="8"
-                            Padding="10"
-                            Margin="8,0,0,0">
-                        <StackPanel>
-                            <TextBlock Text="Savings"
-                                       FontWeight="Medium"
-                                       FontSize="13"
-                                       Foreground="#374151"/>
+                        <!-- Список категорій із прогрес-барами -->
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding TopExpenseCategories}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,14">
+                                        <DockPanel Margin="0,0,0,5">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="13"
+                                                       Foreground="#374151"/>
+                                            
+                                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                                <TextBlock Text="{Binding Amount, StringFormat='{}{0:N2} ₴'}"
+                                                           FontWeight="Bold"
+                                                           FontSize="13"
+                                                           Foreground="#EF4444"
+                                                           Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding Percentage, StringFormat='{}{0:F0}%'}"
+                                                           FontSize="12"
+                                                           Foreground="#9CA3AF"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DockPanel>
 
-                            <TextBlock Text="{Binding TotalIncome, StringFormat='{}{0:C}'}"
-                                       ToolTip="Поки відображає дохід. Converter буде додано далі."
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       Foreground="#3B82F6"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                                        <!-- Прогрес-бар -->
+                                        <ProgressBar Value="{Binding Percentage}"
+                                                     Maximum="100"
+                                                     Height="6"
+                                                     Foreground="#EF4444"
+                                                     Background="#F3F4F6"
+                                                     BorderThickness="0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Заглушка, якщо немає витрат -->
+                        <TextBlock Grid.Row="1"
+                                   Text="Витрати відсутні за обраний період"
+                                   Foreground="#9CA3AF"
+                                   FontStyle="Italic"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Margin="0,40">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasExpenses}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

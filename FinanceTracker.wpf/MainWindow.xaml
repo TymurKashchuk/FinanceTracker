@@ -1,4 +1,4 @@
-﻿<Window x:Class="FinanceTracker.wpf.MainWindow"
+<Window x:Class="FinanceTracker.wpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,10 +7,16 @@
         xmlns:views="clr-namespace:FinanceTracker.wpf.Views"
         xmlns:conv="clr-namespace:FinanceTracker.wpf.Converters"
         mc:Ignorable="d"
-        Title="Finance Tracker"
-        Height="660"
-        Width="1200"
-        Background="#F3F4F6"
+        Title="FinanceTracker — Особисті фінанси"
+        Height="780"
+        Width="1260"
+        MinWidth="1100"
+        MinHeight="660"
+        Background="#F8FAFC"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
         WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
@@ -21,96 +27,45 @@
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
-    <DockPanel Margin="16">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- Лівий сайдбар -->
+            <ColumnDefinition Width="250"/>
+            <!-- Основна робоча область -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Верхня панель-->
-        <Border Background="White"
-                CornerRadius="8"
-                Padding="15"
-                DockPanel.Dock="Top">
-            <StackPanel>
+        <!-- 1. Сайдбар навігації та рахунків -->
+        <views:SidebarView Grid.Column="0"/>
 
-                <WrapPanel Margin="0,0,0,10">
+        <!-- 2. Основна робоча область -->
+        <Grid Grid.Column="1" Margin="22,18,22,18">
+            <Grid.RowDefinitions>
+                <!-- Верхня панель: Заголовок + Періоди -->
+                <RowDefinition Height="Auto"/>
+                <!-- Панель швидкого додавання операції -->
+                <RowDefinition Height="Auto"/>
+                <!-- Контент поточної сторінки -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                    <TextBox Width="200"
-                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+            <!-- 2.1. Верхній рядок: Заголовок + вибір періоду -->
+            <views:TopBarView Grid.Row="0" Margin="0,0,0,14"/>
 
-                    <TextBox Width="100"
-                             Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
+            <!-- 2.2. Форма швидкого додавання транзакції -->
+            <views:QuickAddView Grid.Row="1" Margin="0,0,0,14"/>
 
-                    <ComboBox Width="140"
-                              ItemsSource="{Binding Accounts}"
-                              DisplayMemberPath="Name"
-                              SelectedItem="{Binding SelectedAccount}"/>
+            <!-- 2.3. Вміст активної сторінки -->
+            <Grid Grid.Row="2">
+                <!-- 1. Дашборд -->
+                <views:HomeView Visibility="{Binding IsDashboardTab, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                    <ComboBox Width="140"
-                              ItemsSource="{Binding TransactionTypes}"
-                              SelectedItem="{Binding TransactionType}"
-                              Margin="0,0,10,0"/>
+                <!-- 2. Транзакції -->
+                <views:TransactionsView Visibility="{Binding IsTransactionsTab, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                    <ComboBox Width="140"
-                              ItemsSource="{Binding Categories}"
-                              DisplayMemberPath="Name"
-                              SelectedItem="{Binding SelectedCategory}"
-                              Visibility="{Binding IsExpenseSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-
-                    <!-- ПЕРІОДИ -->
-                    <ComboBox Width="110"
-                              ItemsSource="{Binding PeriodTypes}"
-                              SelectedItem="{Binding SelectedPeriod}"/>
-
-                    <Button Content="Today"
-                            Width="65"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodTodayCommand}"/>
-                    <Button Content="Week"
-                            Width="65"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodWeekCommand}"/>
-                    <Button Content="Month"
-                            Width="65"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodMonthCommand}"/>
-
-                    <!-- ЛЕЙБЛ ПОТОЧНОГО ПЕРІОДУ -->
-                    <TextBlock Text="{Binding CurrentPeriodText}"
-                               Foreground="#6B7280"
-                               VerticalAlignment="Center"
-                               Margin="5,0"
-                               FontSize="12"/>
-
-                </WrapPanel>
-
-                <!-- Кнопки -->
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-
-                    <Button Content="Add"
-                            Width="100"
-                            Command="{Binding AddCommand}"/>
-                    
-                </StackPanel>
-
-            </StackPanel>
-        </Border>
-
-        <!-- Вкладки -->
-        <TabControl DockPanel.Dock="Top"
-                    Margin="0,15,0,0"
-                    Background="Transparent"
-                    BorderBrush="Transparent">
-            <TabItem Header="Home">
-                <views:HomeView/>
-            </TabItem>
-
-            <TabItem Header="Transactions">
-                <views:TransactionsView/>
-            </TabItem>
-
-            <TabItem Header="Summary">
-                <views:SummaryView DataContext="{Binding}"/>
-            </TabItem>
-        </TabControl>
-
-    </DockPanel>
+                <!-- 3. Аналітика -->
+                <views:SummaryView Visibility="{Binding IsAnalyticsTab, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </Grid>
+        </Grid>
+    </Grid>
 </Window>

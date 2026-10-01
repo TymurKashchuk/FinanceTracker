@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,28 +30,14 @@ namespace FinanceTracker.wpf.Services
         public async Task AddTransactionAsync(Transaction transaction)
         {
             using var db = new AppDbContext();
+            await db.Database.EnsureCreatedAsync();
+
             transaction.Account = null!;
             transaction.Category = null;
 
-            if (!await db.Accounts.AnyAsync())
+            if (!await db.Accounts.AnyAsync() || !await db.Categories.AnyAsync())
             {
-                db.Accounts.AddRange(
-                    new Account { Name = "Cash" },
-                    new Account { Name = "Monobank" },
-                    new Account { Name = "Revolut" }
-                );
-                await db.SaveChangesAsync();
-            }
-
-            if (!await db.Categories.AnyAsync())
-            {
-                db.Categories.AddRange(
-                    new Category { Name = "General", IsIncome = false },
-                    new Category { Name = "Food", IsIncome = false },
-                    new Category { Name = "Transport", IsIncome = false },
-                    new Category { Name = "Salary", IsIncome = true }
-                );
-                await db.SaveChangesAsync();
+                await SeedInternalAsync(db);
             }
 
             if (transaction.AccountId == 0)
@@ -62,33 +48,74 @@ namespace FinanceTracker.wpf.Services
 
             db.Transactions.Add(transaction);
             await db.SaveChangesAsync();
-
         }
 
         public async Task SeedAsync()
         {
             using var db = new AppDbContext();
+            await db.Database.EnsureCreatedAsync();
+            await SeedInternalAsync(db);
+        }
 
-            if (!db.Accounts.Any())
+        private static async Task SeedInternalAsync(AppDbContext db)
+        {
+            if (!await db.Accounts.AnyAsync())
             {
                 db.Accounts.AddRange(
-                    new Account { Name = "Cash" },
+                    new Account { Name = "Готівка" },
                     new Account { Name = "Monobank" },
                     new Account { Name = "Revolut" }
                 );
             }
 
-            if (!db.Categories.Any())
+            if (!await db.Categories.AnyAsync())
             {
                 db.Categories.AddRange(
-                    new Category { Name = "General" },
-                    new Category { Name = "Food" },
-                    new Category { Name = "Transport" },
-                    new Category { Name = "Salary" }
+                    new Category { Name = "Продукти", IsIncome = false },
+                    new Category { Name = "Кафе та ресторани", IsIncome = false },
+                    new Category { Name = "Транспорт", IsIncome = false },
+                    new Category { Name = "Житло та комуналка", IsIncome = false },
+                    new Category { Name = "Розваги", IsIncome = false },
+                    new Category { Name = "Здоров'я", IsIncome = false },
+                    new Category { Name = "Покупки", IsIncome = false },
+                    new Category { Name = "Зарплата", IsIncome = true },
+                    new Category { Name = "Фриланс", IsIncome = true },
+                    new Category { Name = "Інвестиції", IsIncome = true },
+                    new Category { Name = "Подарунок", IsIncome = true },
+                    new Category { Name = "Інше", IsIncome = false }
                 );
+                await db.SaveChangesAsync();
             }
 
-            await db.SaveChangesAsync();
+            if (!await db.MonthlyBudgets.AnyAsync())
+            {
+                var now = DateTime.Now;
+                var expenseCats = await db.Categories.Where(c => !c.IsIncome).ToListAsync();
+                var budgetMap = new Dictionary<string, decimal>
+                {
+                    { "Продукти", 8000m },
+                    { "Житло та комуналка", 6000m },
+                    { "Кафе та ресторани", 3000m },
+                    { "Транспорт", 2000m },
+                    { "Розваги", 2500m },
+                    { "Покупки", 4000m }
+                };
+
+                foreach (var cat in expenseCats)
+                {
+                    if (budgetMap.TryGetValue(cat.Name, out var planned))
+                    {
+                        db.MonthlyBudgets.Add(new MonthlyBudget
+                        {
+                            CategoryId = cat.Id,
+                            Year = now.Year,
+                            Month = now.Month,
+                            PlannedAmount = planned
+                        });
+                    }
+                }
+                await db.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteTransactionAsync(int id)
@@ -110,10 +137,15 @@ namespace FinanceTracker.wpf.Services
                 .ToListAsync();
         }
 
-        public async Task<List<Category>> GetCategoriesAsync()
+        public async Task<List<Category>> GetCategoriesAsync(bool? isIncome = null)
         {
             using var db = new AppDbContext();
-            return await db.Categories
+            var query = db.Categories.AsQueryable();
+            if (isIncome.HasValue)
+            {
+                query = query.Where(c => c.IsIncome == isIncome.Value);
+            }
+            return await query
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
@@ -210,6 +242,64 @@ namespace FinanceTracker.wpf.Services
             }
 
             await File.WriteAllLinesAsync(filePath, csv, System.Text.Encoding.UTF8);
+        }
+
+        public class CategoryBudgetDto
+        {
+            public int CategoryId { get; set; }
+            public string CategoryName { get; set; } = string.Empty;
+            public decimal PlannedAmount { get; set; }
+            public decimal SpentAmount { get; set; }
+            public decimal RemainingAmount => Math.Max(0, PlannedAmount - SpentAmount);
+            public double ProgressPercentage => PlannedAmount > 0 ? (double)(SpentAmount / PlannedAmount * 100) : 0;
+            public bool IsOverBudget => SpentAmount > PlannedAmount;
+            public string StatusBadgeText => IsOverBudget 
+                ? $"Перевитрата: {(SpentAmount - PlannedAmount):N0} ₴" 
+                : $"Залишок: {RemainingAmount:N0} ₴";
+        }
+
+        public async Task<List<CategoryBudgetDto>> GetMonthlyBudgetsAsync(int year, int month)
+        {
+            using var db = new AppDbContext();
+            var budgets = await db.MonthlyBudgets
+                .Include(b => b.Category)
+                .Where(b => b.Year == year && b.Month == month)
+                .ToListAsync();
+
+            if (!budgets.Any())
+            {
+                await SeedInternalAsync(db);
+                budgets = await db.MonthlyBudgets
+                    .Include(b => b.Category)
+                    .Where(b => b.Year == year && b.Month == month)
+                    .ToListAsync();
+            }
+
+            var start = new DateTime(year, month, 1);
+            var end = start.AddMonths(1).AddTicks(-1);
+
+            var transactions = await db.Transactions
+                .Where(t => !t.IsIncome && t.Date >= start && t.Date <= end)
+                .ToListAsync();
+
+            var result = budgets.Select(b =>
+            {
+                var spent = transactions
+                    .Where(t => t.CategoryId == b.CategoryId)
+                    .Sum(t => t.Amount);
+
+                return new CategoryBudgetDto
+                {
+                    CategoryId = b.CategoryId,
+                    CategoryName = b.Category.Name,
+                    PlannedAmount = b.PlannedAmount,
+                    SpentAmount = spent
+                };
+            })
+            .OrderByDescending(b => b.ProgressPercentage)
+            .ToList();
+
+            return result;
         }
     }
 }
