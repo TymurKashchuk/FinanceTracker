@@ -212,6 +212,20 @@
                                             BorderThickness="0,0,0,1"
                                             Padding="6,9">
                                         <DockPanel LastChildFill="True">
+                                            <!-- Кнопка швидкого видалення праворуч -->
+                                            <Button Style="{StaticResource ActionDeleteButtonStyle}"
+                                                    ToolTip="Видалити операцію"
+                                                    DockPanel.Dock="Right"
+                                                    Margin="6,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.DeleteTransactionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <Path Data="{StaticResource GeoTrash}"
+                                                      Fill="#EF4444"
+                                                      Width="11" Height="11"
+                                                      Stretch="Uniform"/>
+                                            </Button>
+
                                             <!-- Сума праворуч -->
                                             <TextBlock Text="{Binding FormattedAmount}"
                                                        FontSize="14"

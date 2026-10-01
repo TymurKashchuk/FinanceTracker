@@ -331,81 +331,140 @@
                     BorderBrush="#E2E8F0"
                     BorderThickness="1"
                     CornerRadius="10"
-                    Padding="16,12"
+                    Padding="18,14"
                     Margin="0,0,0,14">
-                <StackPanel>
-                    <TextBlock Text="Швидке додавання операції"
-                               FontSize="12"
-                               FontWeight="Bold"
-                               Foreground="#334155"
-                               Margin="2,0,0,8"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- Заголовок + статус-повідомлення -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Рядок 1: Основні поля введення -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Рядок 2: Дата зі швидкими кнопками + Кнопки дій -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <WrapPanel VerticalAlignment="Center">
+                    <!-- Рядок 0: Заголовок форми + Живе статус-повідомлення -->
+                    <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="False">
+                        <TextBlock Text="Швидке додавання операції"
+                                   FontSize="13"
+                                   FontWeight="Bold"
+                                   Foreground="#1E293B"
+                                   DockPanel.Dock="Left"
+                                   VerticalAlignment="Center"/>
+
+                        <!-- Статус повідомлення (успіх/помилка) -->
+                        <Border DockPanel.Dock="Right"
+                                Visibility="{Binding HasStatusMessage, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                Background="{Binding StatusBackgroundBrush}"
+                                CornerRadius="5"
+                                Padding="10,3"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       Foreground="{Binding StatusForegroundBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"/>
+                        </Border>
+                    </DockPanel>
+
+                    <!-- Рядок 1: Опис, Сума, Тип, Категорія, Рахунок -->
+                    <Grid Grid.Row="1" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <!-- Опис (тягнеться на всю вільну ширину) -->
+                            <ColumnDefinition Width="*"/>
+                            <!-- Сума -->
+                            <ColumnDefinition Width="120"/>
+                            <!-- Тип -->
+                            <ColumnDefinition Width="120"/>
+                            <!-- Категорія -->
+                            <ColumnDefinition Width="150"/>
+                            <!-- Рахунок -->
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+
                         <!-- Опис -->
-                        <StackPanel Margin="0,0,10,0">
-                            <TextBlock Text="Опис" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
-                            <TextBox Width="190"
-                                     Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Опис" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36"/>
                         </StackPanel>
 
                         <!-- Сума -->
-                        <StackPanel Margin="0,0,10,0">
-                            <TextBlock Text="Сума (₴)" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
-                            <TextBox Width="95"
-                                     Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"/>
-                        </StackPanel>
-
-                        <!-- Дата -->
-                        <StackPanel Margin="0,0,10,0">
-                            <TextBlock Text="Дата" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
-                            <DatePicker Width="125"
-                                        SelectedDate="{Binding SelectedDate}"/>
-                        </StackPanel>
-
-                        <!-- Рахунок -->
-                        <StackPanel Margin="0,0,10,0">
-                            <TextBlock Text="Рахунок" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
-                            <ComboBox Width="130"
-                                      ItemsSource="{Binding Accounts}"
-                                      DisplayMemberPath="Name"
-                                      SelectedItem="{Binding SelectedAccount}"/>
+                        <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                            <TextBlock Text="Сума (₴)" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                            <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="36"/>
                         </StackPanel>
 
                         <!-- Тип -->
-                        <StackPanel Margin="0,0,10,0">
-                            <TextBlock Text="Тип" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
-                            <ComboBox Width="110"
-                                      ItemsSource="{Binding TransactionTypes}"
-                                      SelectedItem="{Binding TransactionType}"/>
+                        <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                            <TextBlock Text="Тип" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding TransactionTypes}"
+                                      SelectedItem="{Binding TransactionType}"
+                                      Height="36"/>
                         </StackPanel>
 
                         <!-- Категорія -->
-                        <StackPanel Margin="0,0,12,0">
-                            <TextBlock Text="Категорія" FontSize="11" Foreground="#64748B" Margin="2,0,0,3"/>
-                            <ComboBox Width="140"
-                                      ItemsSource="{Binding FilteredCategories}"
+                        <StackPanel Grid.Column="3" Margin="0,0,12,0">
+                            <TextBlock Text="Категорія" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding FilteredCategories}"
                                       DisplayMemberPath="Name"
-                                      SelectedItem="{Binding SelectedCategory}"/>
+                                      SelectedItem="{Binding SelectedCategory}"
+                                      Height="36"/>
                         </StackPanel>
 
-                        <!-- Дії -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,0,0,1">
-                            <Button Content="+ Додати"
-                                    MinWidth="110"
-                                    Height="36"
-                                    Padding="16,6"
-                                    Command="{Binding AddCommand}"/>
+                        <!-- Рахунок -->
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="Рахунок" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding Accounts}"
+                                      DisplayMemberPath="Name"
+                                      SelectedItem="{Binding SelectedAccount}"
+                                      Height="36"/>
+                        </StackPanel>
+                    </Grid>
 
+                    <!-- Рядок 2: Дата + пресети + Кнопки дій -->
+                    <DockPanel Grid.Row="2" LastChildFill="False">
+                        <!-- Блок дати ліворуч -->
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                            <TextBlock Text="Дата:"
+                                       FontSize="11"
+                                       Foreground="#64748B"
+                                       VerticalAlignment="Center"
+                                       Margin="2,0,8,0"/>
+
+                            <DatePicker Width="145"
+                                        Height="36"
+                                        SelectedDate="{Binding SelectedDate}"/>
+
+                            <!-- Швидкі кнопки дати -->
+                            <Button Content="Сьогодні"
+                                    Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                    Command="{Binding SetDateTodayCommand}"
+                                    ToolTip="Встановити сьогоднішню дату"/>
+                            <Button Content="Вчора"
+                                    Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                    Command="{Binding SetDateYesterdayCommand}"
+                                    ToolTip="Встановити вчорашню дату"/>
+                        </StackPanel>
+
+                        <!-- Кнопки дій праворуч -->
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                             <Button Content="Скинути"
                                     MinWidth="85"
                                     Height="36"
-                                    Margin="6,0,0,0"
                                     Padding="14,6"
+                                    Margin="0,0,8,0"
                                     Style="{StaticResource PeriodButtonStyle}"
                                     Command="{Binding ClearFormCommand}"/>
+
+                            <Button Content="+ Додати операцію"
+                                    MinWidth="150"
+                                    Height="36"
+                                    Padding="18,6"
+                                    Command="{Binding AddCommand}"/>
                         </StackPanel>
-                    </WrapPanel>
-                </StackPanel>
+                    </DockPanel>
+                </Grid>
             </Border>
 
             <!-- 2.3. Вміст активної сторінки -->

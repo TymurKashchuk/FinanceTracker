@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using FinanceTracker.wpf.Models;
 using FinanceTracker.wpf.Services;
 using LiveCharts;
@@ -126,6 +127,61 @@ namespace FinanceTracker.wpf.ViewModels
 
         public int FilteredTransactionsCount => FilteredTransactions.Count;
 
+        public ObservableCollection<string> TypeFilterOptions { get; } = new() { "Всі типи", "Тільки витрати", "Тільки доходи" };
+
+        private string _selectedTypeFilter = "Всі типи";
+        public string SelectedTypeFilter
+        {
+            get => _selectedTypeFilter;
+            set
+            {
+                _selectedTypeFilter = value;
+                OnPropertyChanged();
+                ApplyTransactionFilter();
+            }
+        }
+
+        private string _statusMessage = string.Empty;
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set
+            {
+                _statusMessage = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasStatusMessage));
+            }
+        }
+
+        public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
+
+        private bool _isStatusError;
+        public bool IsStatusError
+        {
+            get => _isStatusError;
+            set
+            {
+                _isStatusError = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(StatusBackgroundBrush));
+                OnPropertyChanged(nameof(StatusForegroundBrush));
+            }
+        }
+
+        public Brush StatusBackgroundBrush => IsStatusError
+            ? new SolidColorBrush(Color.FromRgb(0xFE, 0xE2, 0xE2))
+            : new SolidColorBrush(Color.FromRgb(0xD1, 0xFA, 0xE5));
+
+        public Brush StatusForegroundBrush => IsStatusError
+            ? new SolidColorBrush(Color.FromRgb(0x99, 0x1B, 0x1B))
+            : new SolidColorBrush(Color.FromRgb(0x06, 0x5F, 0x46));
+
+        public void SetStatusMessage(string message, bool isError)
+        {
+            StatusMessage = message;
+            IsStatusError = isError;
+        }
+
         private DateTime _selectedDate = DateTime.Today;
         public DateTime SelectedDate
         {
@@ -200,12 +256,16 @@ namespace FinanceTracker.wpf.ViewModels
         public ObservableCollection<AccountBalanceDto> AccountBalances { get; } = new();
         public ObservableCollection<CategorySummaryDto> CategorySummaries { get; } = new();
         public ObservableCollection<TopExpenseCategory> TopExpenseCategories { get; } = new();
+        public ObservableCollection<CategoryBudgetDto> MonthlyBudgets { get; } = new();
+        public bool HasMonthlyBudgets => MonthlyBudgets.Count > 0;
 
         public ICommand AddCommand { get; }
         public ICommand ExportCsvCommand { get; }
         public ICommand DeleteTransactionCommand { get; }
         public ICommand ClearFormCommand { get; }
         public ICommand ClearSearchCommand { get; }
+        public ICommand SetDateTodayCommand { get; }
+        public ICommand SetDateYesterdayCommand { get; }
         public ICommand SetPeriodTodayCommand { get; }
         public ICommand SetPeriodWeekCommand { get; }
         public ICommand SetPeriodMonthCommand { get; }
@@ -224,6 +284,9 @@ namespace FinanceTracker.wpf.ViewModels
             DeleteTransactionCommand = new RelayCommand(async obj => await DeleteTransactionAsync(obj));
             ClearFormCommand = new RelayCommand(_ => ResetForm());
             ClearSearchCommand = new RelayCommand(_ => SearchText = string.Empty);
+
+            SetDateTodayCommand = new RelayCommand(_ => SelectedDate = DateTime.Today);
+            SetDateYesterdayCommand = new RelayCommand(_ => SelectedDate = DateTime.Today.AddDays(-1));
 
             SetPeriodTodayCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.Today);
             SetPeriodWeekCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisWeek);
@@ -330,6 +393,14 @@ namespace FinanceTracker.wpf.ViewModels
             }
             OnPropertyChanged(nameof(HasRecentTransactions));
             OnPropertyChanged(nameof(HasExpenses));
+
+            MonthlyBudgets.Clear();
+            var budgets = await _financeService.GetMonthlyBudgetsAsync(DateTime.Now.Year, DateTime.Now.Month);
+            foreach (var b in budgets)
+            {
+                MonthlyBudgets.Add(b);
+            }
+            OnPropertyChanged(nameof(HasMonthlyBudgets));
         }
 
         private void UpdateFilteredCategories()
@@ -363,6 +434,12 @@ namespace FinanceTracker.wpf.ViewModels
                 query = query.Where(t => t.Account != null && t.Account.Name == SelectedAccountFilter);
             }
 
+            if (!string.IsNullOrEmpty(SelectedTypeFilter) && SelectedTypeFilter != "Всі типи")
+            {
+                bool filterIncome = SelectedTypeFilter == "Тільки доходи";
+                query = query.Where(t => t.IsIncome == filterIncome);
+            }
+
             foreach (var t in query)
             {
                 FilteredTransactions.Add(t);
@@ -375,8 +452,7 @@ namespace FinanceTracker.wpf.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Description) || Amount <= 0 || SelectedAccount == null)
             {
-                MessageBox.Show("Будь ласка, введіть опис, коректну суму (більше 0) та оберіть рахунок.",
-                    "Увага", MessageBoxButton.OK, MessageBoxImage.Information);
+                SetStatusMessage("Будь ласка, введіть опис, коректну суму (> 0) та оберіть рахунок", isError: true);
                 return;
             }
 
@@ -394,25 +470,46 @@ namespace FinanceTracker.wpf.ViewModels
                 await _financeService.AddTransactionAsync(transaction);
 
                 await LoadAsync();
+                var sign = transaction.IsIncome ? "+" : "-";
+                SetStatusMessage($"✓ Операцію «{transaction.Description}» ({sign}{transaction.Amount:N2} ₴) успішно додано", isError: false);
                 ResetForm();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                MessageBox.Show($"Помилка: {ex.Message}");
+                SetStatusMessage($"Помилка: {ex.Message}", isError: true);
             }
         }
 
         public async Task DeleteTransactionAsync(object? obj)
         {
-            if (obj is not Transaction transaction) return;
+            var transaction = obj as Transaction ?? SelectedTransaction;
+            if (transaction == null) return;
 
-            var result = MessageBox.Show("Видалити транзакцію?", "Підтвердження",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var sign = transaction.IsIncome ? "+" : "-";
+            var result = MessageBox.Show(
+                $"Ви впевнені, що хочете видалити операцію?\n\n" +
+                $"• Опис: {transaction.Description}\n" +
+                $"• Сума: {sign}{transaction.Amount:N2} ₴\n" +
+                $"• Дата: {transaction.Date:dd.MM.yyyy HH:mm}\n" +
+                $"• Рахунок: {transaction.Account?.Name ?? "—"}",
+                "Підтвердження видалення",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
             if (result != MessageBoxResult.Yes) return;
 
-            await _financeService.DeleteTransactionAsync(transaction.Id);
-            await LoadAsync();
+            try
+            {
+                await _financeService.DeleteTransactionAsync(transaction.Id);
+                await LoadAsync();
+                SetStatusMessage($"Операцію «{transaction.Description}» успішно видалено", isError: false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                SetStatusMessage($"Помилка при видаленні: {ex.Message}", isError: true);
+            }
         }
 
         private async Task ExportCsvAsync()

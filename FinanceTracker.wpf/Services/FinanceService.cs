@@ -84,9 +84,38 @@ namespace FinanceTracker.wpf.Services
                     new Category { Name = "Подарунок", IsIncome = true },
                     new Category { Name = "Інше", IsIncome = false }
                 );
+                await db.SaveChangesAsync();
             }
 
-            await db.SaveChangesAsync();
+            if (!await db.MonthlyBudgets.AnyAsync())
+            {
+                var now = DateTime.Now;
+                var expenseCats = await db.Categories.Where(c => !c.IsIncome).ToListAsync();
+                var budgetMap = new Dictionary<string, decimal>
+                {
+                    { "Продукти", 8000m },
+                    { "Житло та комуналка", 6000m },
+                    { "Кафе та ресторани", 3000m },
+                    { "Транспорт", 2000m },
+                    { "Розваги", 2500m },
+                    { "Покупки", 4000m }
+                };
+
+                foreach (var cat in expenseCats)
+                {
+                    if (budgetMap.TryGetValue(cat.Name, out var planned))
+                    {
+                        db.MonthlyBudgets.Add(new MonthlyBudget
+                        {
+                            CategoryId = cat.Id,
+                            Year = now.Year,
+                            Month = now.Month,
+                            PlannedAmount = planned
+                        });
+                    }
+                }
+                await db.SaveChangesAsync();
+            }
         }
 
         public async Task DeleteTransactionAsync(int id)
@@ -213,6 +242,64 @@ namespace FinanceTracker.wpf.Services
             }
 
             await File.WriteAllLinesAsync(filePath, csv, System.Text.Encoding.UTF8);
+        }
+
+        public class CategoryBudgetDto
+        {
+            public int CategoryId { get; set; }
+            public string CategoryName { get; set; } = string.Empty;
+            public decimal PlannedAmount { get; set; }
+            public decimal SpentAmount { get; set; }
+            public decimal RemainingAmount => Math.Max(0, PlannedAmount - SpentAmount);
+            public double ProgressPercentage => PlannedAmount > 0 ? (double)(SpentAmount / PlannedAmount * 100) : 0;
+            public bool IsOverBudget => SpentAmount > PlannedAmount;
+            public string StatusBadgeText => IsOverBudget 
+                ? $"Перевитрата: {(SpentAmount - PlannedAmount):N0} ₴" 
+                : $"Залишок: {RemainingAmount:N0} ₴";
+        }
+
+        public async Task<List<CategoryBudgetDto>> GetMonthlyBudgetsAsync(int year, int month)
+        {
+            using var db = new AppDbContext();
+            var budgets = await db.MonthlyBudgets
+                .Include(b => b.Category)
+                .Where(b => b.Year == year && b.Month == month)
+                .ToListAsync();
+
+            if (!budgets.Any())
+            {
+                await SeedInternalAsync(db);
+                budgets = await db.MonthlyBudgets
+                    .Include(b => b.Category)
+                    .Where(b => b.Year == year && b.Month == month)
+                    .ToListAsync();
+            }
+
+            var start = new DateTime(year, month, 1);
+            var end = start.AddMonths(1).AddTicks(-1);
+
+            var transactions = await db.Transactions
+                .Where(t => !t.IsIncome && t.Date >= start && t.Date <= end)
+                .ToListAsync();
+
+            var result = budgets.Select(b =>
+            {
+                var spent = transactions
+                    .Where(t => t.CategoryId == b.CategoryId)
+                    .Sum(t => t.Amount);
+
+                return new CategoryBudgetDto
+                {
+                    CategoryId = b.CategoryId,
+                    CategoryName = b.Category.Name,
+                    PlannedAmount = b.PlannedAmount,
+                    SpentAmount = spent
+                };
+            })
+            .OrderByDescending(b => b.ProgressPercentage)
+            .ToList();
+
+            return result;
         }
     }
 }

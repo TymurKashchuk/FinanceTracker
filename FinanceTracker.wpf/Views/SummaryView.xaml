@@ -15,7 +15,9 @@
                 <!-- Верхні картки підсумків -->
                 <RowDefinition Height="Auto"/>
                 <!-- Двоколонковий блок: Таблиця топ витрат + Діаграма -->
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <!-- 3. Блок місячних бюджетів -->
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- 1. Верхні інформаційні плашки -->
@@ -177,6 +179,99 @@
                     </Grid>
                 </Border>
             </Grid>
+
+            <!-- 3. Блок місячних бюджетів та лімітів витрат -->
+            <Border Grid.Row="2"
+                    Background="White"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="18"
+                    Margin="0,14,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="0,0,0,14">
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock Text="Місячний бюджет та ліміти витрат"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Foreground="#0F172A"/>
+                            <TextBlock Text="Контроль виконання запланованих витрат на поточний місяць"
+                                       FontSize="11"
+                                       Foreground="#64748B"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <TextBlock Text="Поточний місяць"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="#4F46E5"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"/>
+                    </DockPanel>
+
+                    <!-- Список бюджетів -->
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding MonthlyBudgets}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#F1F5F9" BorderThickness="0,0,0,1" Padding="0,8,0,12">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Рядок опису та сум -->
+                                        <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                                            <TextBlock Text="{Binding CategoryName}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="13"
+                                                       Foreground="#1E293B"/>
+
+                                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SpentAmount, StringFormat='{}{0:N0} ₴'}"
+                                                           FontWeight="Bold"
+                                                           FontSize="13"
+                                                           Foreground="#0F172A"/>
+                                                <TextBlock Text=" з "
+                                                           Foreground="#94A3B8"
+                                                           FontSize="12"/>
+                                                <TextBlock Text="{Binding PlannedAmount, StringFormat='{}{0:N0} ₴'}"
+                                                           FontWeight="Medium"
+                                                           Foreground="#64748B"
+                                                           FontSize="12"
+                                                           Margin="0,0,10,0"/>
+
+                                                <!-- Бейдж статусу -->
+                                                <Border Background="#F1F5F9"
+                                                        CornerRadius="4"
+                                                        Padding="8,2">
+                                                    <TextBlock Text="{Binding StatusBadgeText}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="#475569"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </DockPanel>
+
+                                        <!-- Прогрес-бар виконання бюджету -->
+                                        <ProgressBar Grid.Row="1"
+                                                     Value="{Binding ProgressPercentage}"
+                                                     Maximum="100"
+                                                     Height="7"
+                                                     Foreground="#4F46E5"
+                                                     Background="#F1F5F9"
+                                                     BorderThickness="0"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
         </Grid>
     </ScrollViewer>
 </UserControl>
