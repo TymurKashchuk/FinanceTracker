@@ -1,7 +1,8 @@
-﻿using FinanceTracker.wpf.Data;
-using System.Configuration;
-using System.Data;
+using System.Globalization;
+using System.Threading;
 using System.Windows;
+using System.Windows.Markup;
+using FinanceTracker.wpf.Data;
 
 namespace FinanceTracker.wpf;
 
@@ -10,7 +11,17 @@ namespace FinanceTracker.wpf;
 /// </summary>
 public partial class App : Application
 {
-    public App() {
+    public App()
+    {
+        var culture = CultureInfo.GetCultureInfo("uk-UA");
+        Thread.CurrentThread.CurrentCulture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
+
+        FrameworkElement.LanguageProperty.OverrideMetadata(
+            typeof(FrameworkElement),
+            new FrameworkPropertyMetadata(
+                XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+
         using var db = new AppDbContext();
         db.Database.EnsureCreated();
     }

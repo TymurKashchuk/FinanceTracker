@@ -112,54 +112,104 @@
                                Margin="8,0,0,8"/>
 
                     <!-- Кнопка 1: Дашборд -->
-                    <Button Style="{StaticResource SidebarNavButtonStyle}"
-                            Command="{Binding SetTabDashboardCommand}">
-                        <Button.Triggers>
-                            <!-- Visual indication via Style triggers or custom template -->
-                        </Button.Triggers>
+                    <Button Command="{Binding SetTabDashboardCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsDashboardTab}" Value="True">
+                                        <Setter Property="Background" Value="#EEF2FF"/>
+                                        <Setter Property="Foreground" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <DockPanel LastChildFill="True">
                             <Path Data="{StaticResource GeoDashboard}"
-                                  Fill="#4F46E5"
                                   Width="15" Height="15"
                                   Stretch="Uniform"
                                   Margin="0,0,10,0"
-                                  VerticalAlignment="Center"/>
-                            <TextBlock Text="Дашборд"
-                                       FontWeight="SemiBold"
-                                       Foreground="#0F172A"
-                                       VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center">
+                                <Path.Style>
+                                    <Style TargetType="Path">
+                                        <Setter Property="Fill" Value="#64748B"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsDashboardTab}" Value="True">
+                                                <Setter Property="Fill" Value="#4F46E5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                            <TextBlock Text="Дашборд" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
 
                     <!-- Кнопка 2: Транзакції -->
-                    <Button Style="{StaticResource SidebarNavButtonStyle}"
-                            Command="{Binding SetTabTransactionsCommand}">
+                    <Button Command="{Binding SetTabTransactionsCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsTransactionsTab}" Value="True">
+                                        <Setter Property="Background" Value="#EEF2FF"/>
+                                        <Setter Property="Foreground" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <DockPanel LastChildFill="True">
                             <Path Data="{StaticResource GeoTransactions}"
-                                  Fill="#64748B"
                                   Width="15" Height="15"
                                   Stretch="Uniform"
                                   Margin="0,0,10,0"
-                                  VerticalAlignment="Center"/>
-                            <TextBlock Text="Транзакції"
-                                       Foreground="#0F172A"
-                                       VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center">
+                                <Path.Style>
+                                    <Style TargetType="Path">
+                                        <Setter Property="Fill" Value="#64748B"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsTransactionsTab}" Value="True">
+                                                <Setter Property="Fill" Value="#4F46E5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                            <TextBlock Text="Транзакції" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
 
                     <!-- Кнопка 3: Аналітика -->
-                    <Button Style="{StaticResource SidebarNavButtonStyle}"
-                            Command="{Binding SetTabAnalyticsCommand}">
+                    <Button Command="{Binding SetTabAnalyticsCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarNavButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAnalyticsTab}" Value="True">
+                                        <Setter Property="Background" Value="#EEF2FF"/>
+                                        <Setter Property="Foreground" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <DockPanel LastChildFill="True">
                             <Path Data="{StaticResource GeoAnalytics}"
-                                  Fill="#64748B"
                                   Width="15" Height="15"
                                   Stretch="Uniform"
                                   Margin="0,0,10,0"
-                                  VerticalAlignment="Center"/>
-                            <TextBlock Text="Аналітика та звіти"
-                                       Foreground="#0F172A"
-                                       VerticalAlignment="Center"/>
+                                  VerticalAlignment="Center">
+                                <Path.Style>
+                                    <Style TargetType="Path">
+                                        <Setter Property="Fill" Value="#64748B"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsAnalyticsTab}" Value="True">
+                                                <Setter Property="Fill" Value="#4F46E5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                            <TextBlock Text="Аналітика та звіти" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Button>
                 </StackPanel>
@@ -290,28 +340,125 @@
                           Margin="0,0,8,0"
                           VerticalAlignment="Center"/>
 
+                    <!-- Сьогодні -->
                     <Button Content="Сьогодні"
-                            MinWidth="84"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodTodayCommand}"/>
-                    <Button Content="Тиждень"
-                            MinWidth="84"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodWeekCommand}"/>
-                    <Button Content="Місяць"
-                            MinWidth="84"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodMonthCommand}"/>
-                    <Button Content="Весь час"
-                            MinWidth="84"
-                            Style="{StaticResource PeriodButtonStyle}"
-                            Command="{Binding SetPeriodAllTimeCommand}"/>
+                            MinWidth="82"
+                            Command="{Binding SetPeriodTodayCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsTodayPeriod}" Value="True">
+                                        <Setter Property="Background" Value="#4F46E5"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
+                    <!-- Тиждень -->
+                    <Button Content="Тиждень"
+                            MinWidth="82"
+                            Command="{Binding SetPeriodWeekCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsWeekPeriod}" Value="True">
+                                        <Setter Property="Background" Value="#4F46E5"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Місяць -->
+                    <Button Content="Місяць"
+                            MinWidth="82"
+                            Command="{Binding SetPeriodMonthCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMonthPeriod}" Value="True">
+                                        <Setter Property="Background" Value="#4F46E5"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Весь час -->
+                    <Button Content="Весь час"
+                            MinWidth="82"
+                            Command="{Binding SetPeriodAllTimeCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAllTimePeriod}" Value="True">
+                                        <Setter Property="Background" Value="#4F46E5"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Свій період -->
+                    <Button Content="Свій період"
+                            MinWidth="92"
+                            Command="{Binding SetPeriodCustomCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource PeriodButtonStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCustomPeriod}" Value="True">
+                                        <Setter Property="Background" Value="#4F46E5"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="BorderBrush" Value="#4F46E5"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Вибір дат для кастомного періоду -->
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="4,0,0,0"
+                                Visibility="{Binding IsCustomPeriod, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="з"
+                                   FontSize="11"
+                                   Foreground="#64748B"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,4,0"/>
+                        <DatePicker Width="125"
+                                    Height="32"
+                                    SelectedDate="{Binding CustomDateFrom}"/>
+                        <TextBlock Text="по"
+                                   FontSize="11"
+                                   Foreground="#64748B"
+                                   VerticalAlignment="Center"
+                                   Margin="6,0,4,0"/>
+                        <DatePicker Width="125"
+                                    Height="32"
+                                    SelectedDate="{Binding CustomDateTo}"/>
+                    </StackPanel>
+
+                    <!-- Бейдж поточного діапазону -->
                     <Border Background="#EEF2FF"
                             BorderBrush="#C7D2FE"
                             BorderThickness="1"
                             CornerRadius="6"
-                            Width="95"
+                            Padding="12,0"
                             Height="32"
                             Margin="8,0,0,0"
                             VerticalAlignment="Center">
@@ -331,20 +478,18 @@
                     BorderBrush="#E2E8F0"
                     BorderThickness="1"
                     CornerRadius="10"
-                    Padding="18,14"
+                    Padding="18,12"
                     Margin="0,0,0,14">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <!-- Заголовок + статус-повідомлення -->
+                        <!-- Заголовок + статус-повідомлення + кнопка згортання -->
                         <RowDefinition Height="Auto"/>
-                        <!-- Рядок 1: Основні поля введення -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Рядок 2: Дата зі швидкими кнопками + Кнопки дій -->
+                        <!-- Вміст форми (згортається) -->
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Рядок 0: Заголовок форми + Живе статус-повідомлення -->
-                    <DockPanel Grid.Row="0" Margin="0,0,0,10" LastChildFill="False">
+                    <!-- Рядок 0: Заголовок форми + Живе статус-повідомлення + Кнопка Згорнути/Розгорнути -->
+                    <DockPanel Grid.Row="0" LastChildFill="False">
                         <TextBlock Text="Швидке додавання операції"
                                    FontSize="13"
                                    FontWeight="Bold"
@@ -352,118 +497,140 @@
                                    DockPanel.Dock="Left"
                                    VerticalAlignment="Center"/>
 
-                        <!-- Статус повідомлення (успіх/помилка) -->
-                        <Border DockPanel.Dock="Right"
-                                Visibility="{Binding HasStatusMessage, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                Background="{Binding StatusBackgroundBrush}"
-                                CornerRadius="5"
-                                Padding="10,3"
-                                VerticalAlignment="Center">
-                            <TextBlock Text="{Binding StatusMessage}"
-                                       Foreground="{Binding StatusForegroundBrush}"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"/>
-                        </Border>
-                    </DockPanel>
-
-                    <!-- Рядок 1: Опис, Сума, Тип, Категорія, Рахунок -->
-                    <Grid Grid.Row="1" Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <!-- Опис (тягнеться на всю вільну ширину) -->
-                            <ColumnDefinition Width="*"/>
-                            <!-- Сума -->
-                            <ColumnDefinition Width="120"/>
-                            <!-- Тип -->
-                            <ColumnDefinition Width="120"/>
-                            <!-- Категорія -->
-                            <ColumnDefinition Width="150"/>
-                            <!-- Рахунок -->
-                            <ColumnDefinition Width="150"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Опис -->
-                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <TextBlock Text="Опис" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
-                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                     Height="36"/>
-                        </StackPanel>
-
-                        <!-- Сума -->
-                        <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                            <TextBlock Text="Сума (₴)" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
-                            <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
-                                     Height="36"/>
-                        </StackPanel>
-
-                        <!-- Тип -->
-                        <StackPanel Grid.Column="2" Margin="0,0,12,0">
-                            <TextBlock Text="Тип" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
-                            <ComboBox ItemsSource="{Binding TransactionTypes}"
-                                      SelectedItem="{Binding TransactionType}"
-                                      Height="36"/>
-                        </StackPanel>
-
-                        <!-- Категорія -->
-                        <StackPanel Grid.Column="3" Margin="0,0,12,0">
-                            <TextBlock Text="Категорія" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
-                            <ComboBox ItemsSource="{Binding FilteredCategories}"
-                                      DisplayMemberPath="Name"
-                                      SelectedItem="{Binding SelectedCategory}"
-                                      Height="36"/>
-                        </StackPanel>
-
-                        <!-- Рахунок -->
-                        <StackPanel Grid.Column="4">
-                            <TextBlock Text="Рахунок" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
-                            <ComboBox ItemsSource="{Binding Accounts}"
-                                      DisplayMemberPath="Name"
-                                      SelectedItem="{Binding SelectedAccount}"
-                                      Height="36"/>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- Рядок 2: Дата + пресети + Кнопки дій -->
-                    <DockPanel Grid.Row="2" LastChildFill="False">
-                        <!-- Блок дати ліворуч -->
-                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
-                            <TextBlock Text="Дата:"
-                                       FontSize="11"
-                                       Foreground="#64748B"
-                                       VerticalAlignment="Center"
-                                       Margin="2,0,8,0"/>
-
-                            <DatePicker Width="145"
-                                        Height="36"
-                                        SelectedDate="{Binding SelectedDate}"/>
-
-                            <!-- Швидкі кнопки дати -->
-                            <Button Content="Сьогодні"
-                                    Style="{StaticResource DateQuickBadgeButtonStyle}"
-                                    Command="{Binding SetDateTodayCommand}"
-                                    ToolTip="Встановити сьогоднішню дату"/>
-                            <Button Content="Вчора"
-                                    Style="{StaticResource DateQuickBadgeButtonStyle}"
-                                    Command="{Binding SetDateYesterdayCommand}"
-                                    ToolTip="Встановити вчорашню дату"/>
-                        </StackPanel>
-
-                        <!-- Кнопки дій праворуч -->
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
-                            <Button Content="Скинути"
-                                    MinWidth="85"
-                                    Height="36"
-                                    Padding="14,6"
-                                    Margin="0,0,8,0"
-                                    Style="{StaticResource PeriodButtonStyle}"
-                                    Command="{Binding ClearFormCommand}"/>
+                            <!-- Статус повідомлення (успіх/помилка) -->
+                            <Border Visibility="{Binding HasStatusMessage, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Background="{Binding StatusBackgroundBrush}"
+                                    CornerRadius="5"
+                                    Padding="10,3"
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding StatusMessage}"
+                                           Foreground="{Binding StatusForegroundBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"/>
+                            </Border>
 
-                            <Button Content="+ Додати операцію"
-                                    MinWidth="150"
-                                    Height="36"
-                                    Padding="18,6"
-                                    Command="{Binding AddCommand}"/>
+                            <!-- Кнопка Згорнути / + Нова операція -->
+                            <Button Content="{Binding QuickAddToggleText}"
+                                    Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                    Command="{Binding ToggleQuickAddCommand}"
+                                    Height="24"
+                                    MinWidth="80"
+                                    Padding="10,2"
+                                    ToolTip="Показати або сховати форму додавання"/>
                         </StackPanel>
                     </DockPanel>
+
+                    <!-- Рядок 1: Поля форми швидкого додавання (видимі коли розгорнуто) -->
+                    <Grid Grid.Row="1"
+                          Margin="0,12,0,0"
+                          Visibility="{Binding IsQuickAddExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Підрядок 0: Опис, Сума, Тип, Категорія, Рахунок -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <!-- Опис (тягнеться на всю вільну ширину) -->
+                                <ColumnDefinition Width="*"/>
+                                <!-- Сума -->
+                                <ColumnDefinition Width="120"/>
+                                <!-- Тип -->
+                                <ColumnDefinition Width="120"/>
+                                <!-- Категорія -->
+                                <ColumnDefinition Width="150"/>
+                                <!-- Рахунок -->
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Опис -->
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <TextBlock Text="Опис" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                         Height="36"/>
+                            </StackPanel>
+
+                            <!-- Сума -->
+                            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                <TextBlock Text="Сума (₴)" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                                <TextBox Text="{Binding Amount, UpdateSourceTrigger=PropertyChanged}"
+                                         Height="36"/>
+                            </StackPanel>
+
+                            <!-- Тип -->
+                            <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                                <TextBlock Text="Тип" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding TransactionTypes}"
+                                          SelectedItem="{Binding TransactionType}"
+                                          Height="36"/>
+                            </StackPanel>
+
+                            <!-- Категорія -->
+                            <StackPanel Grid.Column="3" Margin="0,0,12,0">
+                                <TextBlock Text="Категорія" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding FilteredCategories}"
+                                          DisplayMemberPath="Name"
+                                          SelectedItem="{Binding SelectedCategory}"
+                                          Height="36"/>
+                            </StackPanel>
+
+                            <!-- Рахунок -->
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Рахунок" FontSize="11" Foreground="#64748B" Margin="2,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding Accounts}"
+                                          DisplayMemberPath="Name"
+                                          SelectedItem="{Binding SelectedAccount}"
+                                          Height="36"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Підрядок 1: Дата + пресети + Кнопки дій -->
+                        <DockPanel Grid.Row="1" LastChildFill="False">
+                            <!-- Блок дати ліворуч -->
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                                <TextBlock Text="Дата:"
+                                           FontSize="11"
+                                           Foreground="#64748B"
+                                           VerticalAlignment="Center"
+                                           Margin="2,0,8,0"/>
+
+                                <DatePicker Width="145"
+                                            Height="36"
+                                            SelectedDate="{Binding SelectedDate}"/>
+
+                                <!-- Швидкі кнопки дати -->
+                                <Button Content="Сьогодні"
+                                        Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                        Command="{Binding SetDateTodayCommand}"
+                                        ToolTip="Встановити сьогоднішню дату"/>
+                                <Button Content="Вчора"
+                                        Style="{StaticResource DateQuickBadgeButtonStyle}"
+                                        Command="{Binding SetDateYesterdayCommand}"
+                                        ToolTip="Встановити вчорашню дату"/>
+                            </StackPanel>
+
+                            <!-- Кнопки дій праворуч -->
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                                <Button Content="Скинути"
+                                        MinWidth="85"
+                                        Height="36"
+                                        Padding="14,6"
+                                        Margin="0,0,8,0"
+                                        Style="{StaticResource PeriodButtonStyle}"
+                                        Command="{Binding ClearFormCommand}"/>
+
+                                <Button Content="+ Додати операцію"
+                                        MinWidth="150"
+                                        Height="36"
+                                        Padding="18,6"
+                                        IsDefault="True"
+                                        Command="{Binding AddCommand}"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Grid>
                 </Grid>
             </Border>
 

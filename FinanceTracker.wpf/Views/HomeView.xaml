@@ -35,6 +35,8 @@
                 <!-- Загальний баланс -->
                 <Border Grid.Column="0"
                         Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="10"
                         Padding="16"
                         Margin="0,0,8,0">
@@ -57,6 +59,8 @@
                 <!-- Доходи -->
                 <Border Grid.Column="1"
                         Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="10"
                         Padding="16"
                         Margin="4,0,4,0">
@@ -99,6 +103,8 @@
                 <!-- Витрати -->
                 <Border Grid.Column="2"
                         Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="10"
                         Padding="16"
                         Margin="4,0,4,0">
@@ -141,6 +147,8 @@
                 <!-- Чистий потік (Net) -->
                 <Border Grid.Column="3"
                         Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="10"
                         Padding="16"
                         Margin="8,0,0,0">
@@ -182,6 +190,8 @@
                 <!-- Ліва колонка: Останні операції -->
                 <Border Grid.Column="0"
                         Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="12"
                         Padding="18"
                         Margin="0,0,8,0">
@@ -298,6 +308,8 @@
                 <!-- Права колонка: Топ витрат за категоріями -->
                 <Border Grid.Column="1"
                         Background="White"
+                        BorderBrush="#E2E8F0"
+                        BorderThickness="1"
                         CornerRadius="12"
                         Padding="18"
                         Margin="8,0,0,0">

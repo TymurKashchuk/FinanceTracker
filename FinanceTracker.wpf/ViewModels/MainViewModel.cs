@@ -23,7 +23,8 @@ namespace FinanceTracker.wpf.ViewModels
         Today,
         ThisWeek,
         ThisMonth,
-        AllTime
+        AllTime,
+        Custom
     }
 
     public enum TransactionType
@@ -83,8 +84,55 @@ namespace FinanceTracker.wpf.ViewModels
             PeriodType.ThisWeek => "Тиждень",
             PeriodType.ThisMonth => "Місяць",
             PeriodType.AllTime => "Весь час",
+            PeriodType.Custom => $"{CustomDateFrom:dd.MM} - {CustomDateTo:dd.MM}",
             _ => "Весь час"
         };
+
+        public bool IsTodayPeriod => SelectedPeriod == PeriodType.Today;
+        public bool IsWeekPeriod => SelectedPeriod == PeriodType.ThisWeek;
+        public bool IsMonthPeriod => SelectedPeriod == PeriodType.ThisMonth;
+        public bool IsAllTimePeriod => SelectedPeriod == PeriodType.AllTime;
+        public bool IsCustomPeriod => SelectedPeriod == PeriodType.Custom;
+
+        private DateTime _customDateFrom = DateTime.Today.AddDays(-7);
+        public DateTime CustomDateFrom
+        {
+            get => _customDateFrom;
+            set
+            {
+                _customDateFrom = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(CurrentPeriodText));
+                if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
+            }
+        }
+
+        private DateTime _customDateTo = DateTime.Today;
+        public DateTime CustomDateTo
+        {
+            get => _customDateTo;
+            set
+            {
+                _customDateTo = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(CurrentPeriodText));
+                if (SelectedPeriod == PeriodType.Custom) _ = LoadAsync();
+            }
+        }
+
+        private bool _isQuickAddExpanded = true;
+        public bool IsQuickAddExpanded
+        {
+            get => _isQuickAddExpanded;
+            set
+            {
+                _isQuickAddExpanded = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(QuickAddToggleText));
+            }
+        }
+
+        public string QuickAddToggleText => IsQuickAddExpanded ? "Згорнути" : "+ Нова операція";
 
         private readonly IFinanceService _financeService;
 
@@ -96,7 +144,7 @@ namespace FinanceTracker.wpf.ViewModels
         public ObservableCollection<Category> Categories { get; } = new();
         public ObservableCollection<Category> FilteredCategories { get; } = new();
         public ObservableCollection<TransactionType> TransactionTypes { get; } = new() { TransactionType.Expense, TransactionType.Income };
-        public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.AllTime };
+        public ObservableCollection<PeriodType> PeriodTypes { get; } = new() { PeriodType.Today, PeriodType.ThisWeek, PeriodType.ThisMonth, PeriodType.AllTime, PeriodType.Custom };
 
         public bool HasRecentTransactions => RecentTransactions.Count > 0;
         public bool HasExpenses => TopExpenseCategories.Count > 0;
@@ -182,11 +230,11 @@ namespace FinanceTracker.wpf.ViewModels
             IsStatusError = isError;
         }
 
-        private DateTime _selectedDate = DateTime.Today;
-        public DateTime SelectedDate
+        private DateTime? _selectedDate = DateTime.Today;
+        public DateTime? SelectedDate
         {
             get => _selectedDate;
-            set { _selectedDate = value; OnPropertyChanged(); }
+            set { _selectedDate = value ?? DateTime.Today; OnPropertyChanged(); }
         }
 
         private PeriodType _selectedPeriod = PeriodType.ThisMonth;
@@ -198,6 +246,11 @@ namespace FinanceTracker.wpf.ViewModels
                 _selectedPeriod = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(CurrentPeriodText));
+                OnPropertyChanged(nameof(IsTodayPeriod));
+                OnPropertyChanged(nameof(IsWeekPeriod));
+                OnPropertyChanged(nameof(IsMonthPeriod));
+                OnPropertyChanged(nameof(IsAllTimePeriod));
+                OnPropertyChanged(nameof(IsCustomPeriod));
                 _ = LoadAsync();
             }
         }
@@ -270,7 +323,9 @@ namespace FinanceTracker.wpf.ViewModels
         public ICommand SetPeriodWeekCommand { get; }
         public ICommand SetPeriodMonthCommand { get; }
         public ICommand SetPeriodAllTimeCommand { get; }
+        public ICommand SetPeriodCustomCommand { get; }
         public ICommand SetPeriodLast30DaysCommand => SetPeriodAllTimeCommand;
+        public ICommand ToggleQuickAddCommand { get; }
         public ICommand SetTabDashboardCommand { get; }
         public ICommand SetTabTransactionsCommand { get; }
         public ICommand SetTabAnalyticsCommand { get; }
@@ -284,6 +339,7 @@ namespace FinanceTracker.wpf.ViewModels
             DeleteTransactionCommand = new RelayCommand(async obj => await DeleteTransactionAsync(obj));
             ClearFormCommand = new RelayCommand(_ => ResetForm());
             ClearSearchCommand = new RelayCommand(_ => SearchText = string.Empty);
+            ToggleQuickAddCommand = new RelayCommand(_ => IsQuickAddExpanded = !IsQuickAddExpanded);
 
             SetDateTodayCommand = new RelayCommand(_ => SelectedDate = DateTime.Today);
             SetDateYesterdayCommand = new RelayCommand(_ => SelectedDate = DateTime.Today.AddDays(-1));
@@ -292,6 +348,7 @@ namespace FinanceTracker.wpf.ViewModels
             SetPeriodWeekCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisWeek);
             SetPeriodMonthCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.ThisMonth);
             SetPeriodAllTimeCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.AllTime);
+            SetPeriodCustomCommand = new RelayCommand(_ => SelectedPeriod = PeriodType.Custom);
 
             SetTabDashboardCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Dashboard);
             SetTabTransactionsCommand = new RelayCommand(_ => CurrentTab = NavigationTab.Transactions);
@@ -462,7 +519,7 @@ namespace FinanceTracker.wpf.ViewModels
                 {
                     Description = Description.Trim(),
                     Amount = Amount,
-                    Date = SelectedDate.Date + DateTime.Now.TimeOfDay,
+                    Date = (SelectedDate ?? DateTime.Today).Date + DateTime.Now.TimeOfDay,
                     IsIncome = TransactionType == TransactionType.Income,
                     AccountId = SelectedAccount.Id,
                     CategoryId = SelectedCategory?.Id
@@ -546,6 +603,7 @@ namespace FinanceTracker.wpf.ViewModels
                 PeriodType.ThisWeek => (StartOfWeek(DateTime.Now), EndOfWeek(DateTime.Now)),
                 PeriodType.ThisMonth => (StartOfMonth(DateTime.Now), EndOfMonth(DateTime.Now)),
                 PeriodType.AllTime => (null, null),
+                PeriodType.Custom => (CustomDateFrom.Date, CustomDateTo.Date.AddDays(1).AddTicks(-1)),
                 _ => (null, null)
             };
         }
